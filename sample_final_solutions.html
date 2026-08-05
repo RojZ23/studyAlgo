@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS3112 Sample Final — Worked Solutions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<style>
+:root{
+  --ink:#0b0f14;
+  --ink-2:#0f151c;
+  --panel:#131b24;
+  --panel-2:#182230;
+  --line:#243040;
+  --line-soft:#1a2430;
+  --text:#dce4ec;
+  --text-dim:#8fa1b3;
+  --text-faint:#5b6b7d;
+  --amber:#e0a458;
+  --amber-soft:#e0a45822;
+  --amber-line:#e0a45855;
+  --green:#7fb77e;
+  --red:#c9776b;
+  --blue:#6fa8c9;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+@font-face{
+  font-family:'Inter';
+  src: local('Inter');
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--amber-soft); color:var(--text); }
+
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink); }
+::-webkit-scrollbar-thumb{ background:var(--line); border-radius:5px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--text-faint); }
+
+.topbar{
+  position:sticky; top:0; z-index:100;
+  background:rgba(11,15,20,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);
+  padding:0 24px;
+  height:64px;
+  display:flex; align-items:center; gap:20px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--mono);
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:0.02em;
+  color:var(--text);
+  white-space:nowrap;
+  cursor:pointer;
+  text-decoration:none;
+}
+.brand-mark{ width:22px; height:22px; position:relative; flex-shrink:0; }
+.brand-mark svg{ display:block; }
+.brand-sub{
+  color:var(--text-faint);
+  font-weight:400;
+  font-size:12px;
+  border-left:1px solid var(--line);
+  padding-left:10px;
+  margin-left:2px;
+}
+.search-wrap{ flex:1; max-width:420px; position:relative; }
+.search-wrap input{
+  width:100%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:13.5px;
+  padding:9px 12px 9px 34px;
+  border-radius:7px;
+  outline:none;
+  transition:border-color .15s;
+}
+.search-wrap input::placeholder{ color:var(--text-faint); }
+.search-wrap input:focus{ border-color:var(--amber-line); }
+.search-icon{
+  position:absolute; left:11px; top:50%; transform:translateY(-50%);
+  color:var(--text-faint);
+  pointer-events:none;
+}
+.search-icon svg{ display:block; }
+.kbd-hint{
+  position:absolute; right:9px; top:50%; transform:translateY(-50%);
+  font-family:var(--mono);
+  font-size:10.5px;
+  color:var(--text-faint);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:2px 5px;
+  pointer-events:none;
+}
+.progress-pill{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-dim);
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.progress-track{
+  width:64px; height:5px;
+  background:var(--panel-2);
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.progress-fill{ height:100%; background:var(--amber); width:0%; transition:width .3s ease; }
+.menu-toggle{
+  display:none;
+  background:none; border:1px solid var(--line);
+  border-radius:7px;
+  width:36px; height:36px;
+  align-items:center; justify-content:center;
+  color:var(--text);
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.shell{ display:grid; grid-template-columns:264px 1fr; max-width:1400px; margin:0 auto; }
+
+.sidebar{
+  position:sticky;
+  top:64px;
+  height:calc(100vh - 64px);
+  overflow-y:auto;
+  padding:22px 14px 40px;
+  border-right:1px solid var(--line-soft);
+}
+.sidebar-section-label{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  padding:0 10px;
+  margin:18px 0 8px;
+}
+.sidebar-section-label:first-child{ margin-top:0; }
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 10px;
+  border-radius:6px;
+  color:var(--text-dim);
+  text-decoration:none;
+  font-size:13px;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:background .12s, color .12s;
+  position:relative;
+}
+.nav-item:hover{ background:var(--panel); color:var(--text); }
+.nav-item.active{ background:var(--panel-2); color:var(--amber); border-left:2px solid var(--amber); }
+.nav-num{ font-family:var(--mono); font-size:10.5px; color:var(--text-faint); width:26px; flex-shrink:0; }
+.nav-item.active .nav-num{ color:var(--amber); }
+.nav-check{ margin-left:auto; width:13px; height:13px; flex-shrink:0; color:var(--green); opacity:0; transition:opacity .15s; }
+.nav-check.done{ opacity:1; }
+
+main{ min-width:0; padding:0 40px 120px; }
+.hero{ padding:56px 0 40px; border-bottom:1px solid var(--line-soft); margin-bottom:8px; }
+.hero-eyebrow{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--amber);
+  letter-spacing:0.06em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+}
+.hero-eyebrow::before{ content:''; width:6px; height:6px; background:var(--amber); border-radius:50%; display:inline-block; }
+.hero h1{ font-size:38px; font-weight:700; letter-spacing:-0.02em; line-height:1.15; margin:0 0 14px; color:#fff; }
+.hero p{ color:var(--text-dim); font-size:15.5px; max-width:640px; margin:0 0 22px; }
+.hero-meta{ display:flex; gap:22px; flex-wrap:wrap; font-family:var(--mono); font-size:12px; color:var(--text-faint); }
+.hero-meta span b{ color:var(--text-dim); font-weight:600; }
+
+.qsection{ padding:52px 0 8px; border-bottom:1px solid var(--line-soft); scroll-margin-top:80px; }
+.qsection:last-child{ border-bottom:none; }
+.qsection-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:6px; }
+.qsection-num{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--amber);
+  background:var(--amber-soft);
+  border:1px solid var(--amber-line);
+  padding:2px 8px;
+  border-radius:5px;
+  flex-shrink:0;
+}
+.qsection-head h2{ font-size:22px; font-weight:700; margin:0; color:#fff; letter-spacing:-0.01em; }
+.qsection-sub{ color:var(--text-faint); font-size:13px; margin:0 0 26px; padding-left:2px; }
+
+.card{ background:var(--panel); border:1px solid var(--line); border-radius:10px; margin-bottom:14px; overflow:hidden; }
+.card-head{ display:flex; align-items:center; gap:12px; padding:15px 18px; cursor:pointer; user-select:none; }
+.card-head:hover{ background:var(--panel-2); }
+.card-tag{ font-family:var(--mono); font-size:11px; color:var(--text-faint); width:26px; flex-shrink:0; }
+.card-title{ flex:1; font-size:14px; font-weight:600; color:var(--text); min-width:0; }
+.card-title code{ font-family:var(--mono); background:var(--panel-2); padding:1px 5px; border-radius:3px; font-size:12.5px; color:var(--blue); }
+.verdict{ font-family:var(--mono); font-size:10.5px; letter-spacing:0.04em; padding:3px 8px; border-radius:20px; flex-shrink:0; white-space:nowrap; }
+.verdict.prove{ background:#7fb77e1c; color:var(--green); border:1px solid #7fb77e40; }
+.verdict.disprove{ background:#c9776b1c; color:var(--red); border:1px solid #c9776b40; }
+.verdict.neutral{ background:#6fa8c91c; color:var(--blue); border:1px solid #6fa8c940; }
+.chev{ color:var(--text-faint); transition:transform .2s; flex-shrink:0; }
+.card.open .chev{ transform:rotate(90deg); }
+.card-body{ display:none; padding:0 18px 20px 18px; border-top:1px solid var(--line-soft); }
+.card.open .card-body{ display:block; padding-top:16px; }
+
+.answer-block{ margin-bottom:14px; }
+.answer-block:last-child{ margin-bottom:0; }
+.label-row{ font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:7px; }
+.answer-block p{ margin:0 0 10px; color:var(--text-dim); font-size:13.8px; }
+.answer-block p:last-child{ margin-bottom:0; }
+.answer-block strong{ color:var(--text); }
+.answer-block ul{ margin:0 0 10px; padding-left:20px; color:var(--text-dim); font-size:13.8px; }
+.answer-block li{ margin-bottom:4px; }
+.big-answer{
+  font-family:var(--mono);
+  font-size:14px;
+  color:var(--amber);
+  background:var(--amber-soft);
+  border:1px solid var(--amber-line);
+  border-radius:7px;
+  padding:10px 14px;
+  margin:8px 0;
+  display:inline-block;
+}
+
+pre{
+  background:var(--ink-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px 16px;
+  overflow-x:auto;
+  margin:8px 0 12px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.65;
+  color:#c3d3e0;
+}
+pre code{ font-family:var(--mono); background:none; padding:0; }
+.answer-block code{ font-family:var(--mono); background:var(--panel-2); padding:1px 5px; border-radius:3px; font-size:12.5px; color:var(--blue); }
+
+table{ width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:13px; }
+th{
+  text-align:left;
+  font-family:var(--mono);
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  color:var(--text-faint);
+  padding:8px 12px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel-2);
+}
+td{ padding:9px 12px; border-bottom:1px solid var(--line-soft); color:var(--text-dim); }
+tr:last-child td{ border-bottom:none; }
+td code, td strong{ color:var(--text); }
+td.tf-true{ color:var(--green); font-family:var(--mono); font-weight:700; }
+td.tf-false{ color:var(--red); font-family:var(--mono); font-weight:700; }
+td.center{ text-align:center; }
+
+.result-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  background:var(--ink-2);
+  border:1px solid var(--line-soft);
+  border-radius:6px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  margin:4px 0;
+}
+.result-row .rtag{ padding:1px 6px; border-radius:4px; font-size:10px; letter-spacing:0.03em; }
+.rtag.safe{ background:#7fb77e22; color:var(--green); }
+.rtag.reject{ background:#c9776b22; color:var(--red); }
+
+.divider-note{
+  border-left:2px solid var(--amber-line);
+  padding:8px 14px;
+  background:var(--amber-soft);
+  border-radius:0 6px 6px 0;
+  font-size:13px;
+  color:var(--text-dim);
+  margin:10px 0;
+}
+.divider-note strong{ color:var(--amber); }
+
+.mjx-chtml{ font-size:104% !important; }
+
+footer{ padding:60px 0 40px; text-align:center; color:var(--text-faint); font-size:12px; font-family:var(--mono); }
+
+.totop{
+  position:fixed;
+  bottom:26px; right:26px;
+  width:42px; height:42px;
+  border-radius:50%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s, transform .15s;
+  z-index:90;
+}
+.totop.show{ opacity:1; pointer-events:auto; }
+.totop:hover{ transform:translateY(-2px); border-color:var(--amber-line); color:var(--amber); }
+
+mark.hl{ background:var(--amber); color:var(--ink); padding:0 1px; border-radius:2px; }
+.no-match{ display:none !important; }
+
+.sidebar-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:98; }
+
+@media (max-width:980px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{
+    position:fixed;
+    top:0; left:0;
+    height:100vh;
+    width:280px;
+    background:var(--ink);
+    z-index:99;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    padding-top:78px;
+  }
+  .sidebar.open{ transform:translateX(0); }
+  .sidebar-backdrop.open{ display:block; }
+  .menu-toggle{ display:flex; }
+  .brand-sub{ display:none; }
+  main{ padding:0 18px 100px; }
+  .hero{ padding:36px 0 28px; }
+  .hero h1{ font-size:28px; }
+  .search-wrap{ max-width:none; }
+  .progress-pill span.plabel{ display:none; }
+}
+@media (max-width:560px){
+  .topbar{ padding:0 14px; gap:12px; }
+  .kbd-hint{ display:none; }
+  .qsection-head h2{ font-size:19px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="backdrop"></div>
+
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5H16M2 9H16M2 13.5H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <a href="#top" class="brand">
+    <span class="brand-mark">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="4" r="2" fill="#e0a458"/>
+        <circle cx="4" cy="14" r="2" fill="#6fa8c9"/>
+        <circle cx="18" cy="14" r="2" fill="#6fa8c9"/>
+        <circle cx="11" cy="20" r="1.6" fill="#7fb77e"/>
+        <path d="M11 6L4 12M11 6L18 12M4 16L11 19M18 16L11 19" stroke="#3a4a5c" stroke-width="1.2"/>
+      </svg>
+    </span>
+    CS3112<span class="brand-sub">Sample Final Solutions</span>
+  </a>
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M13 13L10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    </span>
+    <input type="text" id="searchInput" placeholder="Search problems, formulas, keywords…" autocomplete="off">
+    <span class="kbd-hint">/</span>
+  </div>
+  <div class="progress-pill">
+    <span class="plabel">Reviewed</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="progressText">0/21</span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Part I · Asymptotics (30)</div>
+    <a class="nav-item" data-target="s1"><span class="nav-num">1</span>Prove or disprove<svg class="nav-check" data-check="s1" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s2"><span class="nav-num">2</span>T/F growth-rate table<svg class="nav-check" data-check="s2" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Part II · Recurrences (20)</div>
+    <a class="nav-item" data-target="s3"><span class="nav-num">3</span>3T(n/8) + Dⁿ√n⁴<svg class="nav-check" data-check="s3" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s4"><span class="nav-num">4</span>2-way split, shifted<svg class="nav-check" data-check="s4" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s5"><span class="nav-num">5</span>9T(n/7 − 3) + Dn⁴ᐟ³<svg class="nav-check" data-check="s5" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s6"><span class="nav-num">6</span>T(n−3) + Dn<svg class="nav-check" data-check="s6" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Part III · Hire-Assistant (10)</div>
+    <a class="nav-item" data-target="s7"><span class="nav-num">7</span>Exactly k hires of 8<svg class="nav-check" data-check="s7" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Part IV · Heaps (20)</div>
+    <a class="nav-item" data-target="s8"><span class="nav-num">8</span>MaxHeapify precondition<svg class="nav-check" data-check="s8" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s9"><span class="nav-num">9</span>Reversed build loop<svg class="nav-check" data-check="s9" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s10"><span class="nav-num">10</span>Heapsort, sorted input<svg class="nav-check" data-check="s10" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s11"><span class="nav-num">11</span>Heapsort best case<svg class="nav-check" data-check="s11" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s12"><span class="nav-num">12</span>Node-count bounds, h=10<svg class="nav-check" data-check="s12" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s13"><span class="nav-num">13</span>Height of 1000-elt heap<svg class="nav-check" data-check="s13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s14"><span class="nav-num">14</span>Which arrays aren't max-heaps<svg class="nav-check" data-check="s14" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Part V · Quicksort (20)</div>
+    <a class="nav-item" data-target="s15"><span class="nav-num">15</span>All-equal input<svg class="nav-check" data-check="s15" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s16"><span class="nav-num">16</span>Already-sorted input<svg class="nav-check" data-check="s16" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s17"><span class="nav-num">17</span>Fixing the worst case<svg class="nav-check" data-check="s17" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Part VI · Counting Sort (20)</div>
+    <a class="nav-item" data-target="s18"><span class="nav-num">18</span>Trace C and B<svg class="nav-check" data-check="s18" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s19"><span class="nav-num">19</span>Forward final loop<svg class="nav-check" data-check="s19" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s20"><span class="nav-num">20</span>Sort n/k blocks, O(n log k)<svg class="nav-check" data-check="s20" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </nav>
+
+  <main id="top">
+
+    <section class="hero">
+      <div class="hero-eyebrow">SAMPLE FINAL · SUMMER 2020 · CH. 1–8</div>
+      <h1>Worked solutions,<br>problem by problem.</h1>
+      <p>Every proof, recurrence, trace, and design question from the practice final — expanded with the reasoning, not just the answer. Click any card to open it. Press <code style="font-family:var(--mono);background:var(--panel);padding:1px 6px;border-radius:4px;color:var(--blue);">/</code> to jump to search.</p>
+      <div class="hero-meta">
+        <span><b>20</b> sub-parts</span>
+        <span><b>6</b> exam parts</span>
+        <span><b>CS3112</b> · CSU Los Angeles</span>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 1 ============ -->
+    <section class="qsection" id="s1">
+      <div class="qsection-head"><span class="qsection-num">I.1</span><h2>Prove or Disprove</h2></div>
+      <p class="qsection-sub">Four claims about Θ, Ω, and how they interact with addition. Two are true by short direct arguments; two fail to counterexamples built from functions of clearly different growth rates.</p>
+
+      <div class="card" data-search="f theta g implies g omega f prove symmetric">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">a</span>
+          <span class="card-title"><code>f(n) = Θ(g(n))  ⟹  g(n) = Ω(f(n))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p><code>f(n) = Θ(g(n))</code> means there are constants \(c_1,c_2>0\) and \(n_0\) such that for all \(n\ge n_0\):</p>
+            <div class="big-answer">\(c_1\,g(n) \le f(n) \le c_2\,g(n)\)</div>
+            <p>Take the right-hand inequality, \(f(n)\le c_2 g(n)\), and divide by \(c_2\): \(g(n) \ge \frac{1}{c_2}f(n)\). That is exactly the definition of \(g(n)=\Omega(f(n))\) with constant \(\frac{1}{c_2}\). So Θ is symmetric in a stronger sense than it first looks — bounding \(f\) between multiples of \(g\) automatically bounds \(g\) below by a multiple of \(f\).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-search="f g theta min disprove counterexample n n^2">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">b</span>
+          <span class="card-title"><code>f(n)+g(n) = Θ(min(f(n),g(n)))</code>, f,g ≥ 0</span>
+          <span class="verdict disprove">DISPROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Counterexample</div>
+            <p>Let \(f(n)=n\) and \(g(n)=n^2\). Then \(\min(f(n),g(n))=n\), while \(f(n)+g(n)=n+n^2=\Theta(n^2)\). Since \(n = o(n^2)\), the sum is <strong>not</strong> bounded below by any constant multiple of \(\min(f,g)=n\) — the ratio \(\frac{n+n^2}{n}=1+n\) grows without bound instead of staying between two constants.</p>
+            <p>The identity that <em>is</em> true here (and is easy to confuse this with) is <code>f(n)+g(n) = Θ(max(f(n),g(n)))</code>: the larger of the two terms always dominates the sum, but the smaller one gives no such guarantee.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-search="f theta f reflexive prove trivial">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">c</span>
+          <span class="card-title"><code>f(n) = Θ(f(n))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>Θ is reflexive. Pick \(c_1=c_2=1\) and any \(n_0\): trivially \(1\cdot f(n) \le f(n) \le 1\cdot f(n)\) for all \(n\ge n_0\). Every function is tightly bounded by itself.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-search="f omega f theta f disprove sum lower bound only">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">d</span>
+          <span class="card-title"><code>f(n) + Ω(f(n)) = Θ(f(n))</code></span>
+          <span class="verdict disprove">DISPROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>"\(\Omega(f(n))\)" inside the sum stands for <em>any</em> function that is bounded below by a multiple of \(f(n)\) — it carries no upper-bound guarantee at all. So the claim is really: for every \(h(n)=\Omega(f(n))\), is \(f(n)+h(n)=\Theta(f(n))\)?</p>
+            <div class="label-row">Counterexample</div>
+            <p>Let \(f(n)=n\) and \(h(n)=n^2\). Certainly \(h(n)=\Omega(n)\) (it grows at least as fast). But \(f(n)+h(n)=n+n^2=\Theta(n^2)\), which is <strong>not</strong> \(\Theta(n)\) — it's strictly larger order. Ω only promises a floor, so the sum can blow past \(\Theta(f(n))\) as far as the chosen \(h\) allows.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 2 ============ -->
+    <section class="qsection" id="s2">
+      <div class="qsection-head"><span class="qsection-num">I.2</span><h2>Growth-Rate T/F Table</h2></div>
+      <p class="qsection-sub">Four pairs of functions, each checked against all five asymptotic relations. The trick in every row is simplifying the exponents first — three of the four pairs turn out to be exactly equal once simplified.</p>
+
+      <div class="divider-note"><strong>Key simplification used throughout:</strong> \((\sqrt{a})^{\lg n} = a^{(\lg n)/2} = (a^{\lg n})^{1/2}\), and in particular \(2^{\lg n}=n\). Once each side is rewritten as a plain power of \(n\), the comparison is immediate.</div>
+
+      <div class="card" data-search="sqrt2 lg n sqrt n equal T F table row1">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1</span>
+          <span class="card-title"><code>f(n) = (√2)^(lg n)</code>  vs.  <code>g(n) = √n</code></span>
+          <span class="verdict neutral">EQUAL ORDER</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>\((\sqrt2)^{\lg n} = 2^{(\lg n)/2} = (2^{\lg n})^{1/2} = n^{1/2} = \sqrt n\). So \(f(n)=g(n)\) exactly — same order in every sense.</p>
+          </div>
+          <table>
+            <tr><th>O</th><th>o</th><th>Ω</th><th>ω</th><th>Θ</th></tr>
+            <tr><td class="center tf-true">T</td><td class="center tf-false">F</td><td class="center tf-true">T</td><td class="center tf-false">F</td><td class="center tf-true">T</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" data-search="n2^n 2^2n little-o table row2">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">2</span>
+          <span class="card-title"><code>f(n) = n·2ⁿ</code>  vs.  <code>g(n) = 2^(2n)</code></span>
+          <span class="verdict neutral">f = o(g)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>\(2^{2n}=(2^n)^2=4^n\). The ratio \(\dfrac{n\cdot 2^n}{4^n} = \dfrac{n}{2^n}\to 0\) as \(n\to\infty\), since exponentials always beat polynomials. So \(f(n)=o(g(n))\) — strictly smaller order, with no lower bound holding.</p>
+          </div>
+          <table>
+            <tr><th>O</th><th>o</th><th>Ω</th><th>ω</th><th>Θ</th></tr>
+            <tr><td class="center tf-true">T</td><td class="center tf-true">T</td><td class="center tf-false">F</td><td class="center tf-false">F</td><td class="center tf-false">F</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" data-search="n 2^lg n equal table row3">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">3</span>
+          <span class="card-title"><code>f(n) = n</code>  vs.  <code>g(n) = 2^(lg n)</code></span>
+          <span class="verdict neutral">EQUAL ORDER</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>\(2^{\lg n} = n\) by definition of \(\lg\) as \(\log_2\). So \(f(n)=g(n)=n\) exactly.</p>
+          </div>
+          <table>
+            <tr><th>O</th><th>o</th><th>Ω</th><th>ω</th><th>Θ</th></tr>
+            <tr><td class="center tf-true">T</td><td class="center tf-false">F</td><td class="center tf-true">T</td><td class="center tf-false">F</td><td class="center tf-true">T</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" data-search="n lg n sqrt4 lg n little-omega table row4">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">4</span>
+          <span class="card-title"><code>f(n) = n·lg n</code>  vs.  <code>g(n) = (√4)^(lg n)</code></span>
+          <span class="verdict neutral">f = ω(g)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>\((\sqrt4)^{\lg n} = 2^{\lg n} = n\), so this row compares \(f(n)=n\lg n\) against \(g(n)=n\). Since \(n\lg n\) is a factor of \(\lg n\) larger, \(f(n)=\omega(g(n))\) — strictly bigger order, with no upper bound holding.</p>
+          </div>
+          <table>
+            <tr><th>O</th><th>o</th><th>Ω</th><th>ω</th><th>Θ</th></tr>
+            <tr><td class="center tf-false">F</td><td class="center tf-false">F</td><td class="center tf-true">T</td><td class="center tf-true">T</td><td class="center tf-false">F</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 3 ============ -->
+    <section class="qsection" id="s3">
+      <div class="qsection-head"><span class="qsection-num">II.1</span><h2>Recurrence — Master Theorem, Case 1</h2></div>
+      <div class="card open" data-search="3T n/8 D n^1/4 master theorem case 1">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">II.1</span>
+          <span class="card-title">T(n) = 3T(n/8) + D·⁴√n</span>
+          <span class="verdict neutral">MASTER, CASE 1</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+\[ T(n) = \begin{cases} 3T\!\left(\dfrac{n}{8}\right) + D\,n^{1/4} & n>1 \\ C & n=1 \end{cases} \]
+          <div class="answer-block">
+            <p>Here \(a=3\), \(b=8\), \(f(n)=\Theta(n^{1/4})\). Compare the exponent of \(f\) against \(\log_b a = \log_8 3 \approx 0.528\):</p>
+            <div class="big-answer">1/4 = 0.25  &lt;  log₈3 ≈ 0.528</div>
+            <p>Since \(f(n)=O\!\left(n^{\log_8 3 - \epsilon}\right)\) for some \(\epsilon>0\) (e.g. \(\epsilon\approx0.27\)), Master Theorem Case 1 applies: the recursive term dominates, and</p>
+          </div>
+          <div class="label-row">Solution</div>
+          <div class="big-answer">T(n) = Θ(n^(log₈3))</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 4 ============ -->
+    <section class="qsection" id="s4">
+      <div class="qsection-head"><span class="qsection-num">II.2</span><h2>Recurrence — Shifted Two-Way Split</h2></div>
+      <div class="card open" data-search="T n/2-1 T n/2-3 Dn merge sort like theta n lg n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">II.2</span>
+          <span class="card-title">T(n) = T(n/2 − 1) + T(n/2 − 3) + Dn</span>
+          <span class="verdict neutral">n log n</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+\[ T(n) = \begin{cases} T\!\left(\dfrac{n}{2}-1\right) + T\!\left(\dfrac{n}{2}-3\right) + Dn & n>1 \\ C & n=1 \end{cases} \]
+          <div class="answer-block">
+            <p>Both recursive calls split the problem into (approximately) two halves; the "−1" and "−3" are lower-order shifts that don't change which asymptotic bucket the recurrence falls into — they only shift the recursion tree's boundary by a constant number of elements per level, never the branching factor or the per-level work.</p>
+            <p>Treating this as \(T(n)\approx 2T(n/2)+\Theta(n)\) — the same shape as Merge Sort's recurrence — a recursion-tree argument confirms it: each of the \(\lg n\) levels does \(\Theta(n)\) total work (the constant shifts only shave a lower-order amount off the subproblem sizes, not the total count of leaves or the per-level sum), giving the classic Master Theorem Case 2 result.</p>
+          </div>
+          <div class="label-row">Solution</div>
+          <div class="big-answer">T(n) = Θ(n·lg n)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 5 ============ -->
+    <section class="qsection" id="s5">
+      <div class="qsection-head"><span class="qsection-num">II.3</span><h2>Recurrence — Master Theorem, Case 3</h2></div>
+      <div class="card open" data-search="9T n/7-3 Dn^4/3 master theorem case 3 regularity">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">II.3</span>
+          <span class="card-title">T(n) = 9T(n/7 − 3) + Dn·∛n</span>
+          <span class="verdict neutral">MASTER, CASE 3</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+\[ T(n) = \begin{cases} 9T\!\left(\dfrac{n}{7}-3\right) + D\,n\sqrt[3]{n} & n>1 \\ C & n=1 \end{cases} \]
+          <div class="answer-block">
+            <p>Note \(D\,n\cdot n^{1/3} = D\,n^{4/3}\), so \(a=9\), \(b=7\), \(f(n)=\Theta(n^{4/3})\). The "−3" is a lower-order shift and doesn't change \(b\)'s effective value. Compare exponents:</p>
+            <div class="big-answer">log₇9 ≈ 1.129  &lt;  4/3 ≈ 1.333</div>
+            <p>So \(f(n)=\Omega\!\left(n^{\log_7 9+\epsilon}\right)\). Check the regularity condition for Case 3, \(a\,f(n/b)\le c\,f(n)\) for some \(c&lt;1\):</p>
+            <div class="big-answer">9·(n/7)^(4/3) = (9/7^(4/3))·n^(4/3) ≈ 0.67·n^(4/3)</div>
+            <p>Since \(0.67&lt;1\), regularity holds, and Case 3 applies: the work at the root dominates the whole recursion tree.</p>
+          </div>
+          <div class="label-row">Solution</div>
+          <div class="big-answer">T(n) = Θ(n^(4/3))</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 6 ============ -->
+    <section class="qsection" id="s6">
+      <div class="qsection-head"><span class="qsection-num">II.4</span><h2>Recurrence — Subtract-and-Conquer</h2></div>
+      <div class="card open" data-search="T n-3 Dn linear recursion theta n^2 unrolling">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">II.4</span>
+          <span class="card-title">T(n) = T(n − 3) + Dn</span>
+          <span class="verdict neutral">UNROLL, n²</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+\[ T(n) = \begin{cases} T(n-3) + Dn & n>1 \\ C & n=1 \end{cases} \]
+          <div class="answer-block">
+            <p>This is a subtract-by-constant recurrence, not divide-and-conquer, so the Master Theorem doesn't apply — unroll it directly. There are roughly \(n/3\) levels of recursion before reaching the base case, and the work at each level decreases by 3 each time:</p>
+\[ T(n) = C + D\Big(n + (n-3) + (n-6) + \cdots \Big) \]
+            <p>This is an arithmetic series of about \(n/3\) terms, averaging roughly \(n/2\) each, so the sum is \(\approx \dfrac{n}{3}\cdot\dfrac{n}{2} = \dfrac{n^2}{6}\) — the same shape as \(T(n)=T(n-1)+\Theta(n)\), the standard "insertion-sort-style" linear recursion.</p>
+          </div>
+          <div class="label-row">Solution</div>
+          <div class="big-answer">T(n) = Θ(n²)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 7 ============ -->
+    <section class="qsection" id="s7">
+      <div class="qsection-head"><span class="qsection-num">III</span><h2>Hire-Assistant: Probability of Exactly k Hires</h2></div>
+      <p class="qsection-sub">In Hire-Assistant, you hire a new assistant every time the current candidate beats every candidate interviewed so far. "Hiring exactly k times out of n" is exactly the event that the random permutation of candidates has exactly k left-to-right maxima (records) — counted by the unsigned Stirling numbers of the first kind, <code>⌊n, k⌋</code>.</p>
+
+      <div class="card open" data-search="hire assistant probability stirling numbers first kind left to right maxima 8!">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">III</span>
+          <span class="card-title">n = 8 candidates, all orders equally likely</span>
+          <span class="verdict neutral">STIRLING (1ˢᵗ KIND)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>For \(n\) candidates, the number of orderings that produce exactly \(k\) hires equals \(\left[{n\atop k}\right]\), the unsigned Stirling number of the first kind — the count of permutations of \(n\) elements with exactly \(k\) left-to-right maxima. Two endpoints are easy to reason about directly, and the middle two come from the recurrence \(\left[{n\atop k}\right] = \left[{n-1\atop k-1}\right] + (n-1)\left[{n-1\atop k}\right]\):</p>
+            <ul>
+              <li><strong>Exactly 8 hires</strong> — every candidate must beat all before them, i.e. the order is fully increasing. Only 1 such permutation exists.</li>
+              <li><strong>Exactly 1 hire</strong> — only the very first candidate hired, meaning the overall best candidate must appear first; the other 7 can follow in any order: \(7! = 5040\) permutations.</li>
+              <li><strong>Exactly 7 hires</strong> — all but one candidate is a "record." This happens precisely when the permutation is one transposition away from fully increasing, i.e. \(\binom{8}{2}=28\) permutations.</li>
+              <li><strong>Exactly 2 hires</strong> — from the recurrence table for row \(n=8\): \(\left[{8\atop 2}\right] = 13068\).</li>
+            </ul>
+            <p>(As a check, the full row for \(n=8\), \(k=1\ldots8\), is \(5040,\,13068,\,13132,\,6769,\,1960,\,322,\,28,\,1\) — and it sums to \(8! = 40320\), as it must, since every permutation has some well-defined number of records.)</p>
+          </div>
+          <table>
+            <tr><th>Exactly this many hires</th><th>Probability</th></tr>
+            <tr><td>1</td><td><strong>5040/8!</strong>  (= 1/8)</td></tr>
+            <tr><td>2</td><td><strong>13068/8!</strong></td></tr>
+            <tr><td>7</td><td><strong>28/8!</strong></td></tr>
+            <tr><td>8</td><td><strong>1/8!</strong></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 8 ============ -->
+    <section class="qsection" id="s8">
+      <div class="qsection-head"><span class="qsection-num">IV.1</span><h2>MaxHeapify Precondition</h2></div>
+      <div class="card open" data-search="maxheapify i heap-size/2 not leaf sift down effect">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1</span>
+          <span class="card-title">Effect of MaxHeapify(A, i) when i &lt; heap-size/2</span>
+          <span class="verdict neutral">DESIGN NOTE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>MaxHeapify assumes the subtrees rooted at <code>LEFT(i)</code> and <code>RIGHT(i)</code> are already valid max-heaps, but that <code>A[i]</code> itself might violate the heap property against its children. Because <code>i &lt; A.heap-size/2</code>, node <code>i</code> is guaranteed to be an internal node (leaves live at indices <code>&gt; ⌊heap-size/2⌋</code>), so it has at least one real child to compare against.</p>
+            <p>The call lets the value at <code>A[i]</code> "float down" — repeatedly swapping with its larger child — until it either reaches a position where it's ≥ both children, or falls all the way to a leaf. The net effect: the subtree rooted at <code>i</code> becomes a valid max-heap.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 9 ============ -->
+    <section class="qsection" id="s9">
+      <div class="qsection-head"><span class="qsection-num">IV.2</span><h2>Reversing the BuildMaxHeap Loop</h2></div>
+      <div class="card open" data-search="buildmaxheap for loop increasing 1 to n/2 would not work precondition violated">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">2</span>
+          <span class="card-title">for i = 1 to ⌊A.length/2⌋ instead of downto</span>
+          <span class="verdict disprove">WOULD NOT WORK</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>No — running the loop upward from the root toward the middle breaks MaxHeapify's precondition. MaxHeapify(A, i) only works correctly if the subtrees at <code>LEFT(i)</code> and <code>RIGHT(i)</code> are <em>already</em> max-heaps. The original loop runs from <code>⌊n/2⌋ downto 1</code> — bottom-up — so every child subtree is heapified before its parent is processed.</p>
+            <p>Reversing the direction would call <code>MaxHeapify(A, 1)</code> — the root — <em>first</em>, while its children's subtrees are still unheapified garbage. The sift-down at the root would use incorrect information about its children and could place the wrong element there; later calls further down wouldn't fix that mistake, since MaxHeapify never revisits ancestors. The result is not guaranteed to be a max-heap.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 10 ============ -->
+    <section class="qsection" id="s10">
+      <div class="qsection-head"><span class="qsection-num">IV.3</span><h2>Heapsort on Already-Sorted Input</h2></div>
+      <div class="card open" data-search="heapsort sorted increasing decreasing order running time theta n lg n no adaptive best case">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">3–4</span>
+          <span class="card-title">Increasing-order input, and decreasing-order input</span>
+          <span class="verdict neutral">Θ(n lg n), BOTH</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p><code>BuildMaxHeap</code> runs in \(\Theta(n)\) regardless of the input's initial order — that bound comes from summing heap heights across levels, an aggregate argument that doesn't depend on which permutation of values is being heapified. After that, Heapsort repeatedly extracts the max and re-heapifies, and each of the \(n-1\) extractions costs \(\Theta(\lg n)\) in the worst case for <em>any</em> array of that size, sorted or not — Heapsort has no shortcut path for inputs that happen to already be ordered.</p>
+            <p>So whether <code>A</code> starts sorted ascending or descending, the total cost is the same:</p>
+          </div>
+          <div class="label-row">Sorted increasing</div>
+          <div class="big-answer">Θ(n lg n)</div>
+          <div class="label-row" style="margin-top:14px;">Sorted decreasing</div>
+          <div class="big-answer">Θ(n lg n)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 11 ============ -->
+    <section class="qsection" id="s11">
+      <div class="qsection-head"><span class="qsection-num">IV.4</span><h2>Best-Case Running Time of Heapsort</h2></div>
+      <div class="card open" data-search="heapsort best case theta n lg n not adaptive">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">5</span>
+          <span class="card-title">Best case over all inputs of size n</span>
+          <span class="verdict neutral">Θ(n lg n)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>Unlike, say, Insertion Sort (which has an \(O(n)\) best case on already-sorted input), Heapsort's structure — build a heap, then repeatedly swap the max to the end and sift down — doesn't have an input arrangement that meaningfully shortens the work. Building the heap always costs \(\Theta(n)\), and the \(n-1\) extract-and-sift steps always cost \(\Theta(\lg n)\) each on average across the run. So the best, average, and worst cases all coincide at:</p>
+          </div>
+          <div class="big-answer">Θ(n lg n)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 12 ============ -->
+    <section class="qsection" id="s12">
+      <div class="qsection-head"><span class="qsection-num">IV.6</span><h2>Node-Count Bounds for a Heap of Height 10</h2></div>
+      <div class="card open" data-search="minimum maximum elements heap height 10 2^h 2^h+1-1">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">6</span>
+          <span class="card-title">Minimum and maximum size of a height-10 heap</span>
+          <span class="verdict neutral">2^h  and  2^(h+1) − 1</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>A binary heap of height \(h\) is a nearly-complete binary tree, so its element count \(n\) always satisfies \(2^h \le n \le 2^{h+1}-1\): the minimum occurs when the last level has just a single node, and the maximum occurs when the last level is completely full.</p>
+            <p>For \(h=10\):</p>
+          </div>
+          <div class="label-row">Minimum</div>
+          <div class="big-answer">2¹⁰ = 1024</div>
+          <div class="label-row" style="margin-top:14px;">Maximum</div>
+          <div class="big-answer">2¹¹ − 1 = 2047</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 13 ============ -->
+    <section class="qsection" id="s13">
+      <div class="qsection-head"><span class="qsection-num">IV.7</span><h2>Height of a 1000-Element Heap</h2></div>
+      <div class="card open" data-search="height 1000 element heap floor lg n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">7</span>
+          <span class="card-title">h = ⌊lg n⌋ for n = 1000</span>
+          <span class="verdict neutral">h = 9</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>The height of an \(n\)-element heap is \(\lfloor \lg n \rfloor\). Since \(\lg 1000 \approx 9.966\):</p>
+          </div>
+          <div class="big-answer">Height = ⌊lg 1000⌋ = 9</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 14 ============ -->
+    <section class="qsection" id="s14">
+      <div class="qsection-head"><span class="qsection-num">IV.8</span><h2>Which Arrays Are Not Max-Heaps?</h2></div>
+      <p class="qsection-sub">Checking each array as an implicit binary tree (parent i, children 2i and 2i+1, 1-indexed): every one of the five contains exactly one violating parent/child pair.</p>
+
+      <div class="card open" data-search="max heap check A B C D E array violation not a max heap">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">8</span>
+          <span class="card-title">A, B, C, D, E — checked node by node</span>
+          <span class="verdict disprove">ALL FIVE FAIL</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <table>
+            <tr><th>Array</th><th>Elements (index 1–8)</th><th>Violation</th></tr>
+            <tr><td><strong>A</strong></td><td>72, 40, 70, 35, 30, 55, 65, 39</td><td><code>A[4]=35</code> &lt; <code>A[8]=39</code></td></tr>
+            <tr><td><strong>B</strong></td><td>59, 55, 40, 30, 50, 41, 35, 17</td><td><code>A[3]=40</code> &lt; <code>A[6]=41</code></td></tr>
+            <tr><td><strong>C</strong></td><td>62, 59, 42, 32, 39, 44, 13, 29</td><td><code>A[3]=42</code> &lt; <code>A[6]=44</code></td></tr>
+            <tr><td><strong>D</strong></td><td>78, 56, 20, 55, 57, 23, 15, 20</td><td><code>A[2]=56</code> &lt; <code>A[5]=57</code></td></tr>
+            <tr><td><strong>E</strong></td><td>74, 69, 32, 55, 40, 33, 29, 50</td><td><code>A[3]=32</code> &lt; <code>A[6]=33</code></td></tr>
+          </table>
+          <div class="answer-block">
+            <p>The rule for a max-heap stored as an array (1-indexed) is that every parent at index \(i\) must be \(\ge\) both children at \(2i\) and \(2i+1\). Walking each array's four internal nodes (indices 1–4, since \(n=8\)) turns up exactly one broken parent/child pair per array — each option was constructed with a single planted inversion. So the answer is that <strong>none</strong> of A–E is a valid max-heap; all five must be flagged.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 15 ============ -->
+    <section class="qsection" id="s15">
+      <div class="qsection-head"><span class="qsection-num">V.1</span><h2>Partition / Quicksort on All-Equal Input</h2></div>
+      <div class="card open" data-search="partition all elements same value q returns r worst case theta n^2">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1–2</span>
+          <span class="card-title">A[p..r] all equal — what q, and what running time?</span>
+          <span class="verdict neutral">q = r, Θ(n²)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>Partition(A, p, r){
+  x = A[r];
+  i = p - 1;
+  for(j = p to r-1){
+    if(A[j] <= x){        // always true — every element equals x
+      i = i + 1;
+      exchange A[i] with A[j]
+    }
+  }
+  exchange A[i+1] with A[r];
+  return i+1;
+}</pre>
+          <div class="answer-block">
+            <p>Since every element equals the pivot <code>x = A[r]</code>, the test <code>A[j] &lt;= x</code> is true on every iteration, so <code>i</code> increments every time and ends the loop at <code>i = r-1</code>. The final swap exchanges <code>A[r]</code> with itself (a no-op), and the function returns:</p>
+          </div>
+          <div class="big-answer">q = r</div>
+          <div class="answer-block">
+            <p>Because <code>q</code> always lands at the very end of the subarray, every recursive call is <code>QuickSort(A, p, r-1)</code> paired with an empty <code>QuickSort(A, r+1, r)</code> — the most unbalanced split possible (sizes \(n-1\) and \(0\)), identical in shape to sorting an already-sorted array. That gives the worst-case recurrence \(T(n)=T(n-1)+\Theta(n)\):</p>
+          </div>
+          <div class="big-answer">Θ(n²)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 16 ============ -->
+    <section class="qsection" id="s16">
+      <div class="qsection-head"><span class="qsection-num">V.2</span><h2>Partition / Quicksort on Already-Sorted Input</h2></div>
+      <div class="card open" data-search="partition sorted array q returns r max pivot theta n^2 worst case">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">3–4</span>
+          <span class="card-title">A[p..r] already sorted ascending — what q, and what running time?</span>
+          <span class="verdict neutral">q = r, Θ(n²)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>When <code>A</code> is sorted ascending, the pivot <code>x = A[r]</code> is the <strong>maximum</strong> element of the subarray, so <code>A[j] &lt;= x</code> holds for every <code>j</code> from <code>p</code> to <code>r-1</code> — exactly the same trace as the all-equal case above. <code>i</code> increments on every iteration, ending at <code>r-1</code>, and the final swap is a no-op.</p>
+          </div>
+          <div class="big-answer">q = r</div>
+          <div class="answer-block">
+            <p>Again the pivot always lands at the last position, giving the maximally unbalanced \((n-1, 0)\) split at every level of recursion — this is precisely Quicksort's textbook worst case.</p>
+          </div>
+          <div class="big-answer">Θ(n²)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 17 ============ -->
+    <section class="qsection" id="s17">
+      <div class="qsection-head"><span class="qsection-num">V.3</span><h2>Fixing Quicksort's Worst Case</h2></div>
+      <div class="card open" data-search="improve quicksort worst case randomized partition median of three expected n lg n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">5</span>
+          <span class="card-title">How to avoid the Θ(n²) worst case in practice</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>The two traces above show the problem: always picking <code>A[r]</code> as the pivot is a fixed, predictable rule, so any adversary (or unlucky input, like a sorted or all-equal array) can force the worst-case split every single time.</p>
+            <p>The standard fix is <strong>randomization</strong>: before partitioning, swap <code>A[r]</code> with a uniformly random element of <code>A[p..r]</code> (Randomized-Partition). No fixed input can force bad behavior anymore, because the pivot choice no longer depends on the input's order — it depends on a fresh random draw each call. This gives an <em>expected</em> running time of \(\Theta(n\lg n)\) for any input, with the \(\Theta(n^2)\) case becoming vanishingly unlikely rather than guaranteed.</p>
+            <p>A related deterministic alternative is <strong>median-of-three</strong> (or, for a hard worst-case guarantee, the median-of-medians linear-time selection algorithm) to pick a pivot that's provably close to the true median, bounding the split ratio away from the degenerate \((n-1,0)\) case.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 18 ============ -->
+    <section class="qsection" id="s18">
+      <div class="qsection-head"><span class="qsection-num">VI.1</span><h2>Tracing CountingSort</h2></div>
+      <div class="card open" data-search="counting sort trace C B array 6 8 0 7 2 0 1 7 3 4 6 8 1 3 2 k=8">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1</span>
+          <span class="card-title">CountingSort(A, B, 8) on A = {6,8,0,7,2,0,1,7,3,4,6,8,1,3,2}</span>
+          <span class="verdict neutral">TRACE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Step 1 — raw counts (C[v] = number of times value v occurs)</div>
+            <table>
+              <tr><th>v</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+              <tr><th>C[v]</th><td>2</td><td>2</td><td>2</td><td>2</td><td>1</td><td>0</td><td>2</td><td>2</td><td>2</td></tr>
+            </table>
+            <div class="label-row">Step 2 — cumulative sum (C[v] = number of elements ≤ v)</div>
+            <table>
+              <tr><th>v</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+              <tr><th>C[v]</th><td>2</td><td>4</td><td>6</td><td>8</td><td>9</td><td>9</td><td>11</td><td>13</td><td>15</td></tr>
+            </table>
+            <div class="label-row">Step 3 — build B by placing each element of A (right to left) at position C[A[j]], then decrementing C[A[j]]</div>
+            <p>The final <code>C</code> array above tells you exactly how many slots each value occupies, so tracing the placement loop always lands every value in its correctly sorted block — <code>B</code> ends up as <code>A</code>, sorted:</p>
+          </div>
+          <div class="big-answer">B = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 6, 6, 7, 7, 8, 8 }</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 19 ============ -->
+    <section class="qsection" id="s19">
+      <div class="qsection-head"><span class="qsection-num">VI.2</span><h2>Running the Final Loop Forward Instead of Backward</h2></div>
+      <div class="card open" data-search="counting sort for j = 1 to A.length still sort stability yes no">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">2</span>
+          <span class="card-title">Line 8: "for j = 1 to A.length" instead of downto — still correct?</span>
+          <span class="verdict prove">YES — but not stable</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p><strong>Answer: Yes</strong>, the array would still come out fully sorted.</p>
+            <p>Correctness of CountingSort depends only on the cumulative array <code>C</code>, which tells you the contiguous <em>block</em> of output positions reserved for each value — it says nothing about the order in which equal-valued elements fill that block. Iterating <code>j</code> forward instead of backward still places every occurrence of a value \(v\) somewhere inside \(v\)'s correct block; it just changes <em>which copy</em> of a repeated value lands in which slot within that block.</p>
+            <p>What breaks is <strong>stability</strong>: the standard backward loop preserves the original relative order of equal elements (the one that appeared earlier in <code>A</code> also appears earlier in <code>B</code>). Running forward reverses that relative order among ties, since the last-seen copy of a value now claims the highest remaining slot in its block first. The output is still a valid sorted array — just not a stable sort anymore.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 20 ============ -->
+    <section class="qsection" id="s20">
+      <div class="qsection-head"><span class="qsection-num">VI.3</span><h2>Design: Sorting n/k Pre-Blocked Subsequences in O(n log k)</h2></div>
+      <div class="card open" data-search="design algorithm n/k subsequences k elements each block sorted relative merge sort O n log k">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">3</span>
+          <span class="card-title">Blocks already in relative order — sort each block internally</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <p>The setup guarantees the \(n/k\) blocks are already correctly ordered <em>relative to each other</em> — every element in block \(i\) is smaller than every element in block \(i+1\). The only disorder is <em>within</em> each block of \(k\) elements. So no merging across blocks is needed at all: sort each block on its own, then concatenate the blocks in their existing order.</p>
+          </div>
+<pre>SORT-BLOCKS(A, n, k):
+1  for i = 0 to n/k - 1:
+2      let block = A[i·k + 1 .. i·k + k]        // the i-th group of k elements
+3      Merge-Sort(block)                         // or Heapsort — any Θ(k lg k) sort
+4      write block back into A[i·k + 1 .. i·k + k]
+5  return A                                       // blocks are already in order — done</pre>
+          <div class="answer-block">
+            <div class="label-row">Running time</div>
+            <p>Each of the \(n/k\) blocks is sorted independently in \(\Theta(k\lg k)\) time using any comparison-based sort:</p>
+          </div>
+          <div class="big-answer">(n/k) · Θ(k lg k) = Θ(n lg k)</div>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center;padding:40px 0 0;">
+      <div id="noResults" style="display:none;color:var(--text-faint);font-family:var(--mono);font-size:13px;padding:60px 0;">
+        No matches found. Try a different term.
+      </div>
+    </div>
+
+    <footer>
+      CS3112 · CSU Los Angeles · Instructor: Jungsoo Lim &nbsp;·&nbsp; Sample Final, Summer 2020 &nbsp;·&nbsp; Solutions compiled for review
+    </footer>
+
+  </main>
+</div>
+
+<div class="totop" id="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M8 3L3 8M8 3L13 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+const TOTAL_PROBLEMS = 20;
+const reviewed = new Set(JSON.parse(localStorage.getItem('cs3112_sample_reviewed') || '[]'));
+
+function updateProgress(){
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  const pct = Math.min(100, (reviewed.size / TOTAL_PROBLEMS) * 100);
+  fill.style.width = pct + '%';
+  text.textContent = reviewed.size + '/' + TOTAL_PROBLEMS;
+  document.querySelectorAll('.nav-check').forEach(el=>{
+    const key = el.getAttribute('data-check');
+    el.classList.toggle('done', reviewed.has(key));
+  });
+}
+
+function toggleCard(headEl){
+  const card = headEl.closest('.card');
+  card.classList.toggle('open');
+  const section = headEl.closest('.qsection');
+  if(section){
+    reviewed.add(section.id);
+    localStorage.setItem('cs3112_sample_reviewed', JSON.stringify([...reviewed]));
+    updateProgress();
+  }
+}
+updateProgress();
+
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.qsection');
+
+navItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const target = document.getElementById(item.getAttribute('data-target'));
+    if(target){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      closeSidebar();
+    }
+  });
+});
+
+const spyObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navItems.forEach(n=>n.classList.toggle('active', n.getAttribute('data-target')===id));
+    }
+  });
+}, { rootMargin: '-80px 0px -70% 0px', threshold:0 });
+sections.forEach(s=>spyObserver.observe(s));
+
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const menuToggle = document.getElementById('menuToggle');
+function openSidebar(){ sidebar.classList.add('open'); backdrop.classList.add('open'); }
+function closeSidebar(){ sidebar.classList.remove('open'); backdrop.classList.remove('open'); }
+menuToggle.addEventListener('click', ()=> sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+backdrop.addEventListener('click', closeSidebar);
+
+const totop = document.getElementById('totop');
+window.addEventListener('scroll', ()=>{
+  totop.classList.toggle('show', window.scrollY > 600);
+});
+
+const searchInput = document.getElementById('searchInput');
+const allCards = document.querySelectorAll('.card');
+const allSections = document.querySelectorAll('.qsection');
+const noResults = document.getElementById('noResults');
+
+function clearHighlights(){
+  document.querySelectorAll('mark.hl').forEach(m=>{
+    const parent = m.parentNode;
+    parent.replaceChild(document.createTextNode(m.textContent), m);
+    parent.normalize();
+  });
+}
+
+function runSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  clearHighlights();
+
+  if(q === ''){
+    allCards.forEach(c=>{ c.classList.remove('no-match'); });
+    allSections.forEach(s=>{ s.classList.remove('no-match'); });
+    noResults.style.display = 'none';
+    return;
+  }
+
+  let anyMatch = false;
+  allSections.forEach(section=>{
+    let sectionHasMatch = false;
+    const cardsInSection = section.querySelectorAll('.card');
+    cardsInSection.forEach(card=>{
+      const haystack = (card.getAttribute('data-search') || '') + ' ' + card.textContent.toLowerCase();
+      const match = haystack.toLowerCase().includes(q);
+      card.classList.toggle('no-match', !match);
+      if(match){
+        sectionHasMatch = true;
+        anyMatch = true;
+        card.classList.add('open');
+        const titleEl = card.querySelector('.card-title');
+        if(titleEl){
+          highlightText(titleEl, q);
+        }
+      }
+    });
+    if(cardsInSection.length > 0){
+      section.classList.toggle('no-match', !sectionHasMatch);
+    } else {
+      const sectionText = section.textContent.toLowerCase();
+      const match = sectionText.includes(q);
+      section.classList.toggle('no-match', !match);
+      if(match) anyMatch = true;
+    }
+  });
+
+  noResults.style.display = anyMatch ? 'none' : 'block';
+}
+
+function highlightText(el, q){
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+  let node;
+  while(node = walker.nextNode()){
+    const idx = node.textContent.toLowerCase().indexOf(q);
+    if(idx !== -1){
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + q.length);
+      const mark = document.createElement('mark');
+      mark.className = 'hl';
+      try{
+        range.surroundContents(mark);
+      }catch(e){ /* skip if it spans elements */ }
+      break;
+    }
+  }
+}
+
+searchInput.addEventListener('input', runSearch);
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === '/' && document.activeElement !== searchInput){
+    e.preventDefault();
+    searchInput.focus();
+  }
+  if(e.key === 'Escape' && document.activeElement === searchInput){
+    searchInput.value = '';
+    runSearch();
+    searchInput.blur();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS3112 Final — Worked Solutions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<style>
+:root{
+  --ink:#0b0f14;
+  --ink-2:#0f151c;
+  --panel:#131b24;
+  --panel-2:#182230;
+  --line:#243040;
+  --line-soft:#1a2430;
+  --text:#dce4ec;
+  --text-dim:#8fa1b3;
+  --text-faint:#5b6b7d;
+  --amber:#e0a458;
+  --amber-soft:#e0a45822;
+  --amber-line:#e0a45855;
+  --green:#7fb77e;
+  --red:#c9776b;
+  --blue:#6fa8c9;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+@font-face{
+  font-family:'Inter';
+  src: local('Inter');
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--amber-soft); color:var(--text); }
+
+/* scrollbar */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink); }
+::-webkit-scrollbar-thumb{ background:var(--line); border-radius:5px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--text-faint); }
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky; top:0; z-index:100;
+  background:rgba(11,15,20,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);
+  padding:0 24px;
+  height:64px;
+  display:flex; align-items:center; gap:20px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--mono);
+  font-weight:600;
+  font-size:14px;
+  letter-spacing:0.02em;
+  color:var(--text);
+  white-space:nowrap;
+  cursor:pointer;
+  text-decoration:none;
+}
+.brand-mark{
+  width:22px; height:22px;
+  position:relative;
+  flex-shrink:0;
+}
+.brand-mark svg{ display:block; }
+.brand-sub{
+  color:var(--text-faint);
+  font-weight:400;
+  font-size:12px;
+  border-left:1px solid var(--line);
+  padding-left:10px;
+  margin-left:2px;
+}
+.search-wrap{
+  flex:1;
+  max-width:420px;
+  position:relative;
+}
+.search-wrap input{
+  width:100%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:13.5px;
+  padding:9px 12px 9px 34px;
+  border-radius:7px;
+  outline:none;
+  transition:border-color .15s;
+}
+.search-wrap input::placeholder{ color:var(--text-faint); }
+.search-wrap input:focus{ border-color:var(--amber-line); }
+.search-icon{
+  position:absolute; left:11px; top:50%; transform:translateY(-50%);
+  color:var(--text-faint);
+  pointer-events:none;
+}
+.search-icon svg{ display:block; }
+.kbd-hint{
+  position:absolute; right:9px; top:50%; transform:translateY(-50%);
+  font-family:var(--mono);
+  font-size:10.5px;
+  color:var(--text-faint);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:2px 5px;
+  pointer-events:none;
+}
+.progress-pill{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-dim);
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.progress-track{
+  width:64px; height:5px;
+  background:var(--panel-2);
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.progress-fill{
+  height:100%;
+  background:var(--amber);
+  width:0%;
+  transition:width .3s ease;
+}
+.menu-toggle{
+  display:none;
+  background:none; border:1px solid var(--line);
+  border-radius:7px;
+  width:36px; height:36px;
+  align-items:center; justify-content:center;
+  color:var(--text);
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+/* ============ LAYOUT ============ */
+.shell{
+  display:grid;
+  grid-template-columns:264px 1fr;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar{
+  position:sticky;
+  top:64px;
+  height:calc(100vh - 64px);
+  overflow-y:auto;
+  padding:22px 14px 40px;
+  border-right:1px solid var(--line-soft);
+}
+.sidebar-section-label{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  padding:0 10px;
+  margin:18px 0 8px;
+}
+.sidebar-section-label:first-child{ margin-top:0; }
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 10px;
+  border-radius:6px;
+  color:var(--text-dim);
+  text-decoration:none;
+  font-size:13px;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:background .12s, color .12s;
+  position:relative;
+}
+.nav-item:hover{ background:var(--panel); color:var(--text); }
+.nav-item.active{
+  background:var(--panel-2);
+  color:var(--amber);
+  border-left:2px solid var(--amber);
+}
+.nav-num{
+  font-family:var(--mono);
+  font-size:10.5px;
+  color:var(--text-faint);
+  width:20px;
+  flex-shrink:0;
+}
+.nav-item.active .nav-num{ color:var(--amber); }
+.nav-check{
+  margin-left:auto;
+  width:13px; height:13px;
+  flex-shrink:0;
+  color:var(--green);
+  opacity:0;
+  transition:opacity .15s;
+}
+.nav-check.done{ opacity:1; }
+
+/* ============ MAIN ============ */
+main{
+  min-width:0;
+  padding:0 40px 120px;
+}
+.hero{
+  padding:56px 0 40px;
+  border-bottom:1px solid var(--line-soft);
+  margin-bottom:8px;
+}
+.hero-eyebrow{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--amber);
+  letter-spacing:0.06em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+}
+.hero-eyebrow::before{
+  content:'';
+  width:6px; height:6px;
+  background:var(--amber);
+  border-radius:50%;
+  display:inline-block;
+}
+.hero h1{
+  font-size:38px;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  line-height:1.15;
+  margin:0 0 14px;
+  color:#fff;
+}
+.hero p{
+  color:var(--text-dim);
+  font-size:15.5px;
+  max-width:640px;
+  margin:0 0 22px;
+}
+.hero-meta{
+  display:flex;
+  gap:22px;
+  flex-wrap:wrap;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-faint);
+}
+.hero-meta span b{ color:var(--text-dim); font-weight:600; }
+.hero-tree{
+  margin-top:28px;
+  opacity:0.9;
+}
+
+/* ============ SECTION ============ */
+.qsection{
+  padding:52px 0 8px;
+  border-bottom:1px solid var(--line-soft);
+  scroll-margin-top:80px;
+}
+.qsection:last-child{ border-bottom:none; }
+.qsection-head{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  margin-bottom:6px;
+}
+.qsection-num{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--amber);
+  background:var(--amber-soft);
+  border:1px solid var(--amber-line);
+  padding:2px 8px;
+  border-radius:5px;
+  flex-shrink:0;
+}
+.qsection-head h2{
+  font-size:22px;
+  font-weight:700;
+  margin:0;
+  color:#fff;
+  letter-spacing:-0.01em;
+}
+.qsection-sub{
+  color:var(--text-faint);
+  font-size:13px;
+  margin:0 0 26px;
+  padding-left:2px;
+}
+
+/* ============ CARD ============ */
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.card-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:15px 18px;
+  cursor:pointer;
+  user-select:none;
+}
+.card-head:hover{ background:var(--panel-2); }
+.card-tag{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--text-faint);
+  width:26px;
+  flex-shrink:0;
+}
+.card-title{
+  flex:1;
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+  min-width:0;
+}
+.card-title code{
+  font-family:var(--mono);
+  background:var(--panel-2);
+  padding:1px 5px;
+  border-radius:3px;
+  font-size:12.5px;
+  color:var(--blue);
+}
+.verdict{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:0.04em;
+  padding:3px 8px;
+  border-radius:20px;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+.verdict.prove{ background:#7fb77e1c; color:var(--green); border:1px solid #7fb77e40; }
+.verdict.disprove{ background:#c9776b1c; color:var(--red); border:1px solid #c9776b40; }
+.verdict.neutral{ background:#6fa8c91c; color:var(--blue); border:1px solid #6fa8c940; }
+.chev{
+  color:var(--text-faint);
+  transition:transform .2s;
+  flex-shrink:0;
+}
+.card.open .chev{ transform:rotate(90deg); }
+.card-body{
+  display:none;
+  padding:0 18px 20px 18px;
+  border-top:1px solid var(--line-soft);
+}
+.card.open .card-body{ display:block; padding-top:16px; }
+
+.answer-block{ margin-bottom:14px; }
+.answer-block:last-child{ margin-bottom:0; }
+.label-row{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:7px;
+}
+.answer-block p{
+  margin:0 0 10px;
+  color:var(--text-dim);
+  font-size:13.8px;
+}
+.answer-block p:last-child{ margin-bottom:0; }
+.answer-block strong{ color:var(--text); }
+.big-answer{
+  font-family:var(--mono);
+  font-size:14px;
+  color:var(--amber);
+  background:var(--amber-soft);
+  border:1px solid var(--amber-line);
+  border-radius:7px;
+  padding:10px 14px;
+  margin:8px 0;
+  display:inline-block;
+}
+
+pre{
+  background:var(--ink-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px 16px;
+  overflow-x:auto;
+  margin:8px 0 12px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.65;
+  color:#c3d3e0;
+}
+pre code{ font-family:var(--mono); background:none; padding:0; }
+.answer-block code{
+  font-family:var(--mono);
+  background:var(--panel-2);
+  padding:1px 5px;
+  border-radius:3px;
+  font-size:12.5px;
+  color:var(--blue);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:10px 0 14px;
+  font-size:13px;
+}
+th{
+  text-align:left;
+  font-family:var(--mono);
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  color:var(--text-faint);
+  padding:8px 12px;
+  border-bottom:1px solid var(--line);
+  background:var(--panel-2);
+}
+td{
+  padding:9px 12px;
+  border-bottom:1px solid var(--line-soft);
+  color:var(--text-dim);
+}
+tr:last-child td{ border-bottom:none; }
+td code, td strong{ color:var(--text); }
+
+.result-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  background:var(--ink-2);
+  border:1px solid var(--line-soft);
+  border-radius:6px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  margin:4px 0;
+}
+.result-row .rtag{
+  padding:1px 6px;
+  border-radius:4px;
+  font-size:10px;
+  letter-spacing:0.03em;
+}
+.rtag.safe{ background:#7fb77e22; color:var(--green); }
+.rtag.reject{ background:#c9776b22; color:var(--red); }
+
+.divider-note{
+  border-left:2px solid var(--amber-line);
+  padding:8px 14px;
+  background:var(--amber-soft);
+  border-radius:0 6px 6px 0;
+  font-size:13px;
+  color:var(--text-dim);
+  margin:10px 0;
+}
+.divider-note strong{ color:var(--amber); }
+
+.mjx-chtml{ font-size:104% !important; }
+
+footer{
+  padding:60px 0 40px;
+  text-align:center;
+  color:var(--text-faint);
+  font-size:12px;
+  font-family:var(--mono);
+}
+
+/* back to top */
+.totop{
+  position:fixed;
+  bottom:26px; right:26px;
+  width:42px; height:42px;
+  border-radius:50%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s, transform .15s;
+  z-index:90;
+}
+.totop.show{ opacity:1; pointer-events:auto; }
+.totop:hover{ transform:translateY(-2px); border-color:var(--amber-line); color:var(--amber); }
+
+/* highlight for search match */
+mark.hl{
+  background:var(--amber);
+  color:var(--ink);
+  padding:0 1px;
+  border-radius:2px;
+}
+.no-match{ display:none !important; }
+
+/* mobile sidebar */
+.sidebar-backdrop{
+  display:none;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:98;
+}
+
+@media (max-width:980px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{
+    position:fixed;
+    top:0; left:0;
+    height:100vh;
+    width:280px;
+    background:var(--ink);
+    z-index:99;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    padding-top:78px;
+  }
+  .sidebar.open{ transform:translateX(0); }
+  .sidebar-backdrop.open{ display:block; }
+  .menu-toggle{ display:flex; }
+  .brand-sub{ display:none; }
+  main{ padding:0 18px 100px; }
+  .hero{ padding:36px 0 28px; }
+  .hero h1{ font-size:28px; }
+  .search-wrap{ max-width:none; }
+  .progress-pill span.plabel{ display:none; }
+}
+@media (max-width:560px){
+  .topbar{ padding:0 14px; gap:12px; }
+  .kbd-hint{ display:none; }
+  .qsection-head h2{ font-size:19px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="backdrop"></div>
+
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5H16M2 9H16M2 13.5H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <a href="#top" class="brand">
+    <span class="brand-mark">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="4" r="2" fill="#e0a458"/>
+        <circle cx="4" cy="14" r="2" fill="#6fa8c9"/>
+        <circle cx="18" cy="14" r="2" fill="#6fa8c9"/>
+        <circle cx="11" cy="20" r="1.6" fill="#7fb77e"/>
+        <path d="M11 6L4 12M11 6L18 12M4 16L11 19M18 16L11 19" stroke="#3a4a5c" stroke-width="1.2"/>
+      </svg>
+    </span>
+    CS3112<span class="brand-sub">Final Solutions</span>
+  </a>
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M13 13L10 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    </span>
+    <input type="text" id="searchInput" placeholder="Search problems, formulas, keywords…" autocomplete="off">
+    <span class="kbd-hint">/</span>
+  </div>
+  <div class="progress-pill">
+    <span class="plabel">Reviewed</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="progressText">0/33</span>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Foundations</div>
+    <a class="nav-item" data-target="s1"><span class="nav-num">01</span>Asymptotic notation<svg class="nav-check" data-check="s1" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s2"><span class="nav-num">02</span>Iterative vs. recursive<svg class="nav-check" data-check="s2" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s5"><span class="nav-num">05</span>Recursion → iteration<svg class="nav-check" data-check="s5" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Divide &amp; Conquer</div>
+    <a class="nav-item" data-target="s6"><span class="nav-num">06</span>Strassen's method<svg class="nav-check" data-check="s6" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s7"><span class="nav-num">07</span>Complex mult. in 3 ops<svg class="nav-check" data-check="s7" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s8"><span class="nav-num">08</span>Master theorem<svg class="nav-check" data-check="s8" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s11"><span class="nav-num">11–19</span>Recurrence drills<svg class="nav-check" data-check="s11" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Randomized Algs</div>
+    <a class="nav-item" data-target="s9"><span class="nav-num">09</span>Hire-assistant<svg class="nav-check" data-check="s9" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s10"><span class="nav-num">10</span>Permute-by-sorting2<svg class="nav-check" data-check="s10" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Heaps &amp; Sorting</div>
+    <a class="nav-item" data-target="s20"><span class="nav-num">20</span>Heap node bounds<svg class="nav-check" data-check="s20" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s21"><span class="nav-num">21</span>Heapsort on sorted input<svg class="nav-check" data-check="s21" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s22"><span class="nav-num">22</span>Heapsort worst case<svg class="nav-check" data-check="s22" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s23"><span class="nav-num">23</span>Merge k sorted lists<svg class="nav-check" data-check="s23" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s24"><span class="nav-num">24</span>D-ary heap<svg class="nav-check" data-check="s24" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s25"><span class="nav-num">25</span>Priority queue uses<svg class="nav-check" data-check="s25" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s26"><span class="nav-num">26</span>Quicksort + insertion hybrid<svg class="nav-check" data-check="s26" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Hashing</div>
+    <a class="nav-item" data-target="s27"><span class="nav-num">27</span>Open addressing<svg class="nav-check" data-check="s27" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s28"><span class="nav-num">28</span>Chaining<svg class="nav-check" data-check="s28" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s30"><span class="nav-num">30</span>Hash authentication<svg class="nav-check" data-check="s30" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+
+    <div class="sidebar-section-label">Trees &amp; Graphs</div>
+    <a class="nav-item" data-target="s29"><span class="nav-num">29</span>GCD recurrence<svg class="nav-check" data-check="s29" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s31"><span class="nav-num">31</span>BST search sequences<svg class="nav-check" data-check="s31" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s32"><span class="nav-num">32</span>Cycle detection O(V)<svg class="nav-check" data-check="s32" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="nav-item" data-target="s33"><span class="nav-num">33</span>Tree diameter<svg class="nav-check" data-check="s33" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </nav>
+
+  <main id="top">
+
+    <section class="hero">
+      <div class="hero-eyebrow">SAMPLE FINAL · FALL 2017 · CH. 1–13, 18, 22–23</div>
+      <h1>Worked solutions,<br>problem by problem.</h1>
+      <p>Every proof, recurrence, and design question from the practice final — expanded with the reasoning, not just the answer. Click any card to open it. Press <code style="font-family:var(--mono);background:var(--panel);padding:1px 6px;border-radius:4px;color:var(--blue);">/</code> to jump to search.</p>
+      <div class="hero-meta">
+        <span><b>33</b> problems</span>
+        <span><b>10</b> topic groups</span>
+        <span><b>CS3112</b> · CSU Los Angeles</span>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 1 ============ -->
+    <section class="qsection" id="s1">
+      <div class="qsection-head"><span class="qsection-num">Q1</span><h2>Prove or Disprove — Asymptotic Notation</h2></div>
+      <p class="qsection-sub">Thirteen claims comparing polynomial, logarithmic, and exponential growth. The pattern underneath all of them: exponentials beat every polynomial, and every polynomial beats every power of log — no exceptions, no matter the constants.</p>
+
+      <div class="divider-note"><strong>Core fact used throughout:</strong> for any constants \(a>1\) and \(c>0\): \(\lim_{n\to\infty} n^c / a^n = 0\). Polynomials lose to exponentials, always — the constants in the exponent (like /1000) only shift *when* the crossover happens, never *whether* it happens.</div>
+
+      <div class="card" data-search="n^3 theta 2^n/1000 exponential polynomial disprove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1a</span>
+          <span class="card-title"><code>n³ = θ(2^(n/1000))</code></span>
+          <span class="verdict disprove">DISPROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Exponential always beats polynomial in the long run: \(\lim_{n\to\infty} n^3/2^{n/1000} = 0\). That means \(n^3\) is <strong>strictly smaller order</strong> than \(2^{n/1000}\) — it's \(o(\cdot)\), a strict lower bound, not a tight \(\theta(\cdot)\) bound. θ requires the ratio to stay bounded both above and below by positive constants; here the ratio goes to zero, so the lower bound fails.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n^3 O 2^n/1000 prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1b</span>
+          <span class="card-title"><code>n³ = O(2^(n/1000))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Since \(n^3 = o(2^{n/1000})\) (shown in 1a), and little-o is a strictly stronger claim than big-O, it automatically implies \(O(\cdot)\) too. Anything that's eventually negligible compared to \(g(n)\) is certainly bounded above by it.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n^3 o 2^n/1000 prove little-o">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1c</span>
+          <span class="card-title"><code>n³ = o(2^(n/1000))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Same limit computation as 1a: \(n^3/2^{n/1000} \to 0\), which is the exact definition of little-o. This is the strongest of the three claims in a/b/c, and the one that's actually true.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="log^3 n theta n^1/1000 disprove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1d</span>
+          <span class="card-title"><code>log³n = θ(n^(1/1000))</code></span>
+          <span class="verdict disprove">DISPROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Any positive power of \(n\) — even a tiny one like \(n^{1/1000}\) — eventually outgrows any power of \(\log n\). So \(\log^3 n = o(n^{1/1000})\), a strict lower bound, which rules out the tight θ.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="log^3 n O n^1/1000 prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1e</span>
+          <span class="card-title"><code>log³n = O(n^(1/1000))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Follows directly from little-o implying big-O, same as 1b.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="log^3 n o n^1/1000 prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1f</span>
+          <span class="card-title"><code>log³n = o(n^(1/1000))</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Direct application of "log grows slower than any positive polynomial power," no matter how small that exponent is.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n^1/1000 omega log^3 n prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1g</span>
+          <span class="card-title"><code>n^(1/1000) = Ω(log³n)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>This is just 1f flipped. Since \(\log^3n = o(n^{1/1000})\), reversing the relationship gives \(n^{1/1000} = \omega(\log^3n)\), which is a stronger claim than — and therefore implies — \(\Omega(\log^3n)\).</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n^1/1000 little-omega log^3 n prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1h</span>
+          <span class="card-title"><code>n^(1/1000) = ω(log³n)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Direct consequence of 1f — reversing a little-o relationship always gives a little-omega relationship.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="2^n/1000 omega n^99999 prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1i</span>
+          <span class="card-title"><code>2^(n/1000) = Ω(n^99999)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Exponential beats any fixed polynomial degree, however large. \(99999\) is just a big constant exponent — it doesn't change the category. The exponential eventually dominates.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="2^n/1000 little-omega n^99999 prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1j</span>
+          <span class="card-title"><code>2^(n/1000) = ω(n^99999)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Same reasoning as 1i, strict version — the ratio doesn't just stay bounded below, it grows without bound.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n+a b theta n^b prove limit">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1k</span>
+          <span class="card-title"><code>(n+a)^b = θ(n^b)</code>, b>0, a>1</span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Compute the ratio directly: \(\dfrac{(n+a)^b}{n^b} = \left(1+\dfrac{a}{n}\right)^b \to 1\) as \(n\to\infty\). A ratio converging to a positive constant means both an upper and lower bound exist — exactly what θ requires. Adding a constant \(a\) inside a polynomial never changes its asymptotic order.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n+a b O n^b prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1l</span>
+          <span class="card-title"><code>(n+a)^b = O(n^b)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Immediate from 1k — θ always implies both O and Ω individually.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="n+a b omega n^b prove">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">1m</span>
+          <span class="card-title"><code>(n+a)^b = Ω(n^b)</code></span>
+          <span class="verdict prove">PROVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Also immediate from 1k, the other half of the same θ bound.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 2/3/4 combined ============ -->
+    <section class="qsection" id="s2">
+      <div class="qsection-head"><span class="qsection-num">Q2–4</span><h2>Iterative, Divide-and-Conquer &amp; Recursive Algorithms</h2></div>
+      <p class="qsection-sub">Conceptual definitions — worth having crisp one-liners ready rather than vague descriptions.</p>
+
+      <div class="card" data-search="iterative algorithm loop definition">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q2</span>
+          <span class="card-title">Iterative algorithm</span>
+          <span class="verdict neutral">DEFINE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Repeats a block of steps using loops (<code>for</code>/<code>while</code>), maintaining state in variables that update each pass. No function calls itself — control stays in one stack frame.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="divide and conquer recursion three steps merge sort quick sort strassen">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q3</span>
+          <span class="card-title">Divide-and-conquer algorithm</span>
+          <span class="verdict neutral">DEFINE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Recursively breaks a problem into smaller subproblems of the <em>same type</em>, solves each (recursively), then combines results. Three steps: <strong>Divide</strong>, <strong>Conquer</strong>, <strong>Combine</strong>. Examples: Merge Sort, Quick Sort, Strassen's matrix multiplication.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="iterative vs recursive comparison table memory overhead">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q4</span>
+          <span class="card-title">Iterative vs. Recursive</span>
+          <span class="verdict neutral">COMPARE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <table>
+            <tr><th></th><th>Iterative</th><th>Recursive</th></tr>
+            <tr><td>Control</td><td>loops</td><td>function calls itself</td></tr>
+            <tr><td>Memory</td><td>O(1) extra, typically</td><td>O(depth) call stack</td></tr>
+            <tr><td>Overhead</td><td>low — no call stack</td><td>function-call overhead per level</td></tr>
+            <tr><td>Natural fit</td><td>simple repetition</td><td>self-similar substructure (trees, D&amp;C)</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="qsection" id="s5">
+      <div class="qsection-head"><span class="qsection-num">Q5</span><h2>Can Every Recursive Algorithm Become Iterative?</h2></div>
+      <div class="card open" data-search="recursive to iterative explicit stack theoretically yes">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q5</span>
+          <span class="card-title">Theoretical conversion</span>
+          <span class="verdict prove">YES</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p><strong>Yes, theoretically.</strong> Any recursion can be simulated iteratively using an explicit stack data structure to manually track the state the call stack would otherwise hold — push before what would be a recursive call, pop to resume where you left off, instead of call/return.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 6 ============ -->
+    <section class="qsection" id="s6">
+      <div class="qsection-head"><span class="qsection-num">Q6</span><h2>Strassen's Method</h2></div>
+      <div class="card open" data-search="strassen matrix multiplication 7 multiplications 8 recurrence n^2.81">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q6</span>
+          <span class="card-title">How Strassen reduced the running time</span>
+          <span class="verdict neutral">EXPLAIN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Baseline</div>
+            <p>Standard n×n matrix multiplication is Θ(n³) — 8 recursive multiplications of n/2×n/2 submatrices per level: \(T(n) = 8T(n/2) + \Theta(n^2)\).</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">The trick</div>
+            <p>Reduce from <strong>8 multiplications to 7</strong> per recursive level by cleverly combining sums/differences of submatrix blocks — trading extra <em>additions</em> (cheap) to save one <em>multiplication</em> (expensive) at every level of recursion.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Result</div>
+            <p>New recurrence: \(T(n) = 7T(n/2) + \Theta(n^2)\). By Master Theorem, \(a=7, b=2, \log_2 7 \approx 2.807\):</p>
+            <div class="big-answer">T(n) = Θ(n^log₂7) ≈ Θ(n^2.81)</div>
+            <p>Beats the naive Θ(n³) — a real, if modest, asymptotic win.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 7 ============ -->
+    <section class="qsection" id="s7">
+      <div class="qsection-head"><span class="qsection-num">Q7</span><h2>Complex Number Multiplication — Only 3 Multiplications</h2></div>
+      <div class="card open" data-search="complex number a+bi c+di three multiplications real imaginary algorithm design">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q7</span>
+          <span class="card-title">(a+bi)(c+di) with 3 real multiplications</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Goal</div>
+            <p>Compute \((a+bi)(c+di) = (ac-bd) + (ad+bc)i\) using 3 real multiplications instead of the naive 4 — same Strassen-style trick, one level down.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Algorithm</div>
+<pre>COMPLEX-MULT(a, b, c, d):
+1  P1 = a * c
+2  P2 = b * d
+3  P3 = (a + b) * (c + d)
+4  real = P1 - P2
+5  imag = P3 - P1 - P2
+6  return (real, imag)</pre>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Verification</div>
+            <p>\(P_3 - P_1 - P_2 = (a+b)(c+d) - ac - bd = ac+ad+bc+bd-ac-bd = ad+bc\) ✓ &nbsp; Real part \(= ac-bd = P_1-P_2\) ✓</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 8 ============ -->
+    <section class="qsection" id="s8">
+      <div class="qsection-head"><span class="qsection-num">Q8</span><h2>Master Theorem — Review</h2></div>
+      <div class="card open" data-search="master theorem three cases table f(n) n log_b a">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q8</span>
+          <span class="card-title">T(n) = aT(n/b) + f(n) — the three cases</span>
+          <span class="verdict neutral">REVIEW</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>For \(T(n) = aT(n/b) + f(n)\), \(a \geq 1\), \(b>1\) — compare \(f(n)\) to \(n^{\log_b a}\):</p></div>
+          <table>
+            <tr><th>Case</th><th>Condition</th><th>Result</th></tr>
+            <tr><td>1</td><td><code>f(n) = O(n^(log_b a − ε))</code></td><td><code>T(n) = Θ(n^(log_b a))</code></td></tr>
+            <tr><td>2</td><td><code>f(n) = Θ(n^(log_b a))</code></td><td><code>T(n) = Θ(n^(log_b a) · log n)</code></td></tr>
+            <tr><td>3</td><td><code>f(n) = Ω(n^(log_b a + ε))</code>, and af(n/b) ≤ cf(n)</td><td><code>T(n) = Θ(f(n))</code></td></tr>
+          </table>
+          <div class="answer-block"><p style="margin-top:4px;">Exercises 4.5-1–4.5-4 and Problems 4-1, 4-3 are direct applications of this table — see the recurrence drills in <a href="#s11" style="color:var(--amber);text-decoration:none;">Q11–19 below</a> for worked versions of exactly this exercise type.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 9 ============ -->
+    <section class="qsection" id="s9">
+      <div class="qsection-head"><span class="qsection-num">Q9</span><h2>Hire-Assistant Problem — Probability</h2></div>
+      <p class="qsection-sub">n candidates interviewed in random order; you "hire" whenever the current candidate beats everyone seen so far. Candidate 1 is always hired; the last hire is always the overall best.</p>
+
+      <div class="card open" data-search="hire assistant probability exactly 1 candidate best of 10">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">a</span>
+          <span class="card-title">P(hire exactly 1 candidate), n=10</span>
+          <span class="verdict neutral">1/n</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Hiring only candidate 1 means every candidate after them (2 through 10) must be worse — i.e. candidate 1 is the best of all 10. Probability the overall best lands in position 1, uniformly random order:</p>
+          <div class="big-answer">P(exactly 1 hire) = 1/10</div></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="hire assistant probability all 10 candidates strictly increasing factorial">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">b</span>
+          <span class="card-title">P(hire all 10 candidates)</span>
+          <span class="verdict neutral">1/n!</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Every candidate must beat all before them — the sequence must arrive in strictly increasing order of quality. Only 1 of 10! orderings does this:</p>
+          <div class="big-answer">P(hire all 10) = 1/10! = 1/3,628,800</div></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="hire assistant probability exactly 2 hires harmonic number stirling">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">c</span>
+          <span class="card-title">P(hire exactly 2 candidates)</span>
+          <span class="verdict neutral">H(n-1)/n</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Candidate 1 is always hired. Exactly one more hire means exactly one "record-breaking" candidate appears in positions 2–10, and — since it's the <em>last</em> hire — it must be the overall maximum. Using indicator random variables \(X_i\), the expected number of hires is \(E[\#\text{hires}] = \sum_{i=1}^n \frac{1}{i} = H_n\).</p>
+          <p>The exact count of permutations with exactly 2 records relates to the unsigned Stirling numbers of the first kind:</p>
+          <div class="big-answer">P(exactly 2 hires for n) = H(n−1) / n</div>
+          <p>For n=10: \(H_9 = 1+\frac12+\frac13+\cdots+\frac19 \approx 2.828968\)</p>
+          <div class="big-answer">P(exactly 2 hires) = H₉/10 ≈ 0.2829</div></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="hire assistant general formula n candidates">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">d</span>
+          <span class="card-title">General formula for n candidates</span>
+          <span class="verdict neutral">SUMMARY</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <table>
+            <tr><th>Event</th><th>Probability</th></tr>
+            <tr><td>Exactly 1 hire</td><td><code>1/n</code></td></tr>
+            <tr><td>Hire all n</td><td><code>1/n!</code></td></tr>
+            <tr><td>Exactly 2 hires</td><td><code>H(n-1)/n</code>, where H(n-1) = 1 + 1/2 + ... + 1/(n-1)</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 10 ============ -->
+    <section class="qsection" id="s10">
+      <div class="qsection-head"><span class="qsection-num">Q10</span><h2>Permute-By-Sorting2 — Handling Duplicate Priorities</h2></div>
+      <div class="card open" data-search="permute by sorting duplicate priorities tie break composite key uniform random permutation">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q10</span>
+          <span class="card-title">Fix the tie-breaking problem</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">The problem</div>
+            <p>Standard PERMUTE-BY-SORTING assigns each element a random priority P[i] (e.g. from 1 to n³) and sorts by priority. If priorities can tie, the sort's tie-breaking isn't random — it breaks uniformity of the resulting permutation.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">The fix</div>
+<pre>PERMUTE-BY-SORTING2(A):
+1  n = A.length
+2  let P[1..n] be a new array
+3  for i = 1 to n:
+4      P[i] = RANDOM(1, n^3)       // priority, may collide
+5  sort A, using P as sort keys, and break ties by
+   recursively re-randomizing ONLY the tied elements
+   with fresh priorities until all priorities among
+   ties are distinct
+6  return A</pre>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Simpler equivalent</div>
+            <p>Use <code>P[i] = (RANDOM(1, n³), i)</code> — pair each random priority with the original index. Since indices are always distinct, ties in the composite key are impossible, and the sort is a valid uniform random permutation. This is the standard practical fix: pair with a unique tiebreaker rather than looping.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 11-19 ============ -->
+    <section class="qsection" id="s11">
+      <div class="qsection-head"><span class="qsection-num">Q11–19</span><h2>Recurrence Drills — Master Theorem in Action</h2></div>
+      <p class="qsection-sub">Nine recurrences, each resolved to Θ-notation. Cases 11, 15–18 are direct Master Theorem plug-ins; cases 12–14 and 19 subtract rather than divide, so they're solved by unrolling instead.</p>
+
+      <div class="card" data-search="2T(n/2) + Dn master theorem case 2 n log n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q11</span>
+          <span class="card-title"><code>T(n) = 2T(n/2) + Dn</code></span>
+          <span class="verdict neutral">Case 2</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>a=2, b=2, \(n^{\log_2 2} = n^1\). \(f(n)=Dn=\Theta(n^1)\) → <strong>Case 2</strong>.</p>
+          <div class="big-answer">T(n) = Θ(n log n)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="2T(n-1) + D not divide and conquer unroll exponential">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q12</span>
+          <span class="card-title"><code>T(n) = 2T(n−1) + D</code></span>
+          <span class="verdict neutral">Unroll</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Subtracts rather than divides — not a Master Theorem case. Solve by unrolling:</p>
+          <p>\(T(n) = 2T(n-1)+D = 2[2T(n-2)+D]+D = 4T(n-2)+2D+D = \ldots = 2^{n-1}T(1) + D(2^{n-1}+\ldots+2+1) = 2^{n-1}C + D(2^n-1)\)</p>
+          <div class="big-answer">T(n) = Θ(2ⁿ)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="T(n-1) + D log n unroll stirling n log n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q13</span>
+          <span class="card-title"><code>T(n) = T(n−1) + D log n</code></span>
+          <span class="verdict neutral">Unroll</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Unroll: \(T(n) = C + D\sum_{k=2}^{n} \log k = C + D\log(n!) = \Theta(Dn\log n)\) since \(\log(n!) = \Theta(n\log n)\) by Stirling's approximation.</p>
+          <div class="big-answer">T(n) = Θ(n log n)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="T(n-2) + Dn^2 unroll n cubed sum of squares">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q14</span>
+          <span class="card-title"><code>T(n) = T(n−2) + Dn²</code></span>
+          <span class="verdict neutral">Unroll</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Unroll over n/2 steps: \(T(n) = C + D(n^2 + (n-2)^2 + (n-4)^2 + \ldots)\) — dominated by the top term, sum of n/2 terms each Θ(n²):</p>
+          <div class="big-answer">T(n) = Θ(n³)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="4T(n/3) + Dn log n master theorem case 1">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q15</span>
+          <span class="card-title"><code>T(n) = 4T(n/3) + Dn log n</code></span>
+          <span class="verdict neutral">Case 1</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>a=4, b=3, \(n^{\log_3 4} \approx n^{1.26}\). \(f(n) = Dn\log n\) grows slower than \(n^{1.26}\) since 1.26 &gt; 1 → <strong>Case 1</strong>.</p>
+          <div class="big-answer">T(n) = Θ(n^log₃4) ≈ Θ(n^1.26)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="3T(n/5) + n/log n master theorem case 3 regularity condition">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q16</span>
+          <span class="card-title"><code>T(n) = 3T(n/5) + n/log n</code></span>
+          <span class="verdict neutral">Case 3</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>a=3, b=5, \(n^{\log_5 3} \approx n^{0.68}\). \(f(n)=n/\log n\) grows faster than \(n^{0.68}\) → check the regularity condition: \(af(n/b) = 3\cdot\frac{n/5}{\log(n/5)} \approx \frac{3}{5}\cdot\frac{n}{\log n} \leq c\cdot\frac{n}{\log n}\) for \(c=3/5&lt;1\) ✓ → <strong>Case 3</strong>.</p>
+          <div class="big-answer">T(n) = Θ(n/log n)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="7T(n/2) + Dn^2 sqrt n master theorem case 1 n^2.81">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q17</span>
+          <span class="card-title"><code>T(n) = 7T(n/2) + Dn²√n</code></span>
+          <span class="verdict neutral">Case 1</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>a=7, b=2, \(n^{\log_2 7} \approx n^{2.807}\). \(f(n)=Dn^{2.5}\), and 2.5 &lt; 2.807 → <strong>Case 1</strong>.</p>
+          <div class="big-answer">T(n) = Θ(n^log₂7) ≈ Θ(n^2.81)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="9T(n/3-2) + Dn/2 master theorem case 1 n squared">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q18</span>
+          <span class="card-title"><code>T(n) = 9T(n/3−2) + Dn/2</code></span>
+          <span class="verdict neutral">Case 1</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Treat n/3−2 ≈ n/3 for large n (standard simplification). a=9, b=3, \(n^{\log_3 9} = n^2\). \(f(n)=Dn/2=\Theta(n)\), and \(n = O(n^{2-\epsilon})\) → <strong>Case 1</strong>.</p>
+          <div class="big-answer">T(n) = Θ(n²)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="T(n-1) + n unroll arithmetic series n squared">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q19</span>
+          <span class="card-title"><code>T(n) = T(n−1) + n</code></span>
+          <span class="verdict neutral">Unroll</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Unroll: \(T(n) = C + (n + (n-1) + \ldots + 2) = C + \left[\frac{n(n+1)}{2}-1\right] = \Theta(n^2)\)</p>
+          <div class="big-answer">T(n) = Θ(n²)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 20 ============ -->
+    <section class="qsection" id="s20">
+      <div class="qsection-head"><span class="qsection-num">Q20</span><h2>Max/Min Nodes for Height h in a Max-Heap</h2></div>
+      <div class="card open" data-search="heap height h nodes minimum maximum 2^h nearly complete binary tree">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q20</span>
+          <span class="card-title">n-element max-heap of height h</span>
+          <span class="verdict neutral">BOUNDS</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>A heap of n elements has height \(h = \lfloor \log_2 n \rfloor\) (nearly-complete binary tree, filled left to right).</p>
+          <ul style="color:var(--text-dim);font-size:13.8px;padding-left:20px;margin:0 0 10px;">
+            <li>Minimum n needed to reach height h: just enough for one path of length h.</li>
+            <li>Maximum nodes when height is exactly h: completely full tree of height h.</li>
+          </ul>
+          <div class="big-answer">minimum n = 2ʰ &nbsp;&nbsp;|&nbsp;&nbsp; maximum n = 2^(h+1) − 1</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 21 ============ -->
+    <section class="qsection" id="s21">
+      <div class="qsection-head"><span class="qsection-num">Q21</span><h2>Heap Sort on an Already-Sorted Array</h2></div>
+      <div class="card open" data-search="heapsort increasing decreasing order sorted input still n log n build max heap">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q21</span>
+          <span class="card-title">Increasing vs. decreasing input</span>
+          <span class="verdict neutral">Θ(n log n) either way</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Increasing-order input</div>
+            <p>BUILD-MAX-HEAP still takes Θ(n) — the heap property is violated maximally, since the smallest elements sit at the top of an increasing array, so heapify does full work. Then n−1 EXTRACT-MAX calls, each O(log n).</p>
+            <div class="big-answer">Θ(n log n) — same as worst case</div>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Decreasing-order input</div>
+            <p>The array is <em>already</em> a valid max-heap (root is largest, decreasing satisfies the heap property). BUILD-MAX-HEAP takes Θ(n) trivially — no swaps needed. But EXTRACT-MAX must still remove and re-heapify n−1 times, each still O(log n) in the worst case.</p>
+            <div class="big-answer">Θ(n log n) — extraction still destroys structure each time</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 22 ============ -->
+    <section class="qsection" id="s22">
+      <div class="qsection-head"><span class="qsection-num">Q22</span><h2>Worst-Case Running Time of Heap Sort</h2></div>
+      <div class="card open" data-search="heapsort worst case n log n build heap extract max">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q22</span>
+          <span class="card-title">Heap sort worst case</span>
+          <span class="verdict neutral">Θ(n log n)</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>BUILD-MAX-HEAP is Θ(n), followed by n−1 calls to EXTRACT-MAX / MAX-HEAPIFY, each Θ(log n). Total Θ(n) + Θ(n log n):</p>
+          <div class="big-answer">Θ(n log n)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 23 ============ -->
+    <section class="qsection" id="s23">
+      <div class="qsection-head"><span class="qsection-num">Q23</span><h2>Merge K Sorted Lists in O(n log k)</h2></div>
+      <div class="card open" data-search="merge k sorted lists min heap n log k algorithm design">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q23</span>
+          <span class="card-title">K-way merge with a min-heap</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>MERGE-K-LISTS(lists[1..k]):
+1  build a min-heap H
+2  for i = 1 to k:
+3      if lists[i] is not empty:
+4          insert (lists[i][0], i, 0) into H    // (value, list index, position index)
+5  result = empty list
+6  while H is not empty:
+7      (val, i, pos) = EXTRACT-MIN(H)
+8      append val to result
+9      if pos+1 < length(lists[i]):
+10         insert (lists[i][pos+1], i, pos+1) into H
+11 return result</pre>
+          <div class="answer-block"><p><strong>Analysis:</strong> the heap never holds more than k elements → each insert/extract is O(log k). Total n elements processed, each with one insert + one extract:</p>
+          <div class="big-answer">O(n log k)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 24 ============ -->
+    <section class="qsection" id="s24">
+      <div class="qsection-head"><span class="qsection-num">Q24</span><h2>D-ary Heap</h2></div>
+      <p class="qsection-sub">Like a binary heap, but non-leaf nodes have d children instead of 2.</p>
+
+      <div class="card" data-search="d-ary heap array representation parent child index formula">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">a</span>
+          <span class="card-title">Array representation</span>
+          <span class="verdict neutral">FORMULA</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>For a node at index i (1-indexed):</p>
+          <div class="big-answer">Parent: ⌊(i−2)/d⌋ + 1</div>
+          <div class="big-answer">j-th child (1 ≤ j ≤ d): d(i−1) + j + 1</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="d-ary heap height n d log_d n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">b</span>
+          <span class="card-title">Height in terms of n and d</span>
+          <span class="verdict neutral">FORMULA</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Each level multiplies capacity by d, so height h satisfies \(d^h \approx n\):</p>
+          <div class="big-answer">h = ⌊log_d n⌋ = Θ(log n / log d)</div></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="d-ary max-heap extract max algorithm design heapify">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">c</span>
+          <span class="card-title">EXTRACT-MAX in a d-ary max-heap</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>D-EXTRACT-MAX(A, d):
+1  max = A[1]
+2  A[1] = A[heap-size]
+3  heap-size = heap-size - 1
+4  D-MAX-HEAPIFY(A, 1, d)
+5  return max
+
+D-MAX-HEAPIFY(A, i, d):
+1  largest = i
+2  for j = 1 to d:
+3      child = d*(i-1) + j + 1
+4      if child ≤ heap-size and A[child] > A[largest]:
+5          largest = child
+6  if largest ≠ i:
+7      swap A[i], A[largest]
+8      D-MAX-HEAPIFY(A, largest, d)</pre>
+          <div class="answer-block"><p>Running time: <strong>O(d log_d n)</strong> — each level does O(d) work comparing children, tree has O(log_d n) levels.</p></div>
+        </div>
+      </div>
+
+      <div class="card" data-search="d-ary max-heap insert algorithm design sift up">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">d</span>
+          <span class="card-title">INSERT in a d-ary max-heap</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>D-INSERT(A, key, d):
+1  heap-size = heap-size + 1
+2  A[heap-size] = key
+3  i = heap-size
+4  while i > 1 and A[PARENT(i,d)] < A[i]:
+5      swap A[i], A[PARENT(i,d)]
+6      i = PARENT(i,d)</pre>
+          <div class="answer-block"><p>Running time: <strong>O(log_d n)</strong> — a single path up the tree.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 25 ============ -->
+    <section class="qsection" id="s25">
+      <div class="qsection-head"><span class="qsection-num">Q25</span><h2>Heaps as Priority Queue / Event Scheduler</h2></div>
+      <div class="card open" data-search="priority queue event scheduler simulator min heap max heap implementation">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q25</span>
+          <span class="card-title">Two applications</span>
+          <span class="verdict neutral">EXPLAIN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block">
+            <div class="label-row">Priority queue</div>
+            <p>A max-heap directly implements a priority queue where "priority" = key value.</p>
+            <table style="margin-top:6px;">
+              <tr><th>Operation</th><th>Time</th></tr>
+              <tr><td><code>INSERT(x)</code></td><td>O(log n)</td></tr>
+              <tr><td><code>EXTRACT-MAX()</code></td><td>O(log n)</td></tr>
+              <tr><td><code>INCREASE-KEY(x, new)</code></td><td>O(log n)</td></tr>
+              <tr><td><code>MAXIMUM()</code></td><td>O(1)</td></tr>
+            </table>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Event scheduler in a simulator</div>
+            <p>Use a <strong>min-heap</strong> keyed on event time. To advance simulation: <code>EXTRACT-MIN()</code> pulls the next chronological event in O(log n). New events (possibly triggered by processing the current one) are <code>INSERT</code>ed in O(log n). This avoids re-sorting the entire event list after every insertion — the classic use case for a min-heap.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 26 ============ -->
+    <section class="qsection" id="s26">
+      <div class="qsection-head"><span class="qsection-num">Q26</span><h2>Quicksort + Insertion Sort Hybrid</h2></div>
+      <div class="card open" data-search="quicksort insertion sort hybrid k threshold nearly sorted O(nk + nlog(n/k))">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q26</span>
+          <span class="card-title">Stop quicksort early, finish with insertion sort</span>
+          <span class="verdict prove">WORKS</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p><strong>Yes, this approach works.</strong></p></div>
+          <div class="answer-block">
+            <div class="label-row">Why it works</div>
+            <p>Quicksort's recursion is stopped early — subarrays under size k are left unsorted, just "roughly in the right region," since quicksort still partitions around pivots and correctly places large-scale order. The array ends up "almost sorted" — each element is at most k positions from its final sorted position. Insertion sort is Θ(n·d) where d = max distance any element is from its correct place — with d ≤ k, insertion sort finishes in O(nk).</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Running time</div>
+            <div class="big-answer">O(nk + n log(n/k))</div>
+            <p>The nk term is the final insertion-sort pass; n log(n/k) is the quicksort recursion, which now only descends to subarrays of size k — stopping k early cuts off the bottom log k levels of recursion.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">How to pick k</div>
+            <table>
+              <tr><th>Context</th><th>Choice</th></tr>
+              <tr><td>In theory</td><td><code>k = Θ(log n)</code> — balances nk against n log(n/k), preserving overall Θ(n log n)</td></tr>
+              <tr><td>In practice</td><td>k ≈ 5–20, chosen empirically via benchmarking on the actual machine/compiler</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 27/28 ============ -->
+    <section class="qsection" id="s27">
+      <div class="qsection-head"><span class="qsection-num">Q27–28</span><h2>Open Addressing vs. Chaining</h2></div>
+
+      <div class="card open" data-search="open addressing hash table probe sequence load factor deletion marker">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q27</span>
+          <span class="card-title">Open addressing</span>
+          <span class="verdict neutral">EXPLAIN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>All elements are stored directly in the hash table array itself — no external lists. On collision, probe a sequence of alternative slots (linear, quadratic, or double hashing) until an empty slot is found. Load factor \(\alpha \leq 1\) always — it can never exceed table size. Deletion is tricky: must use a "DELETED" marker rather than simply clearing the slot, or later searches for elements probed past the cleared slot will incorrectly terminate early.</p></div>
+        </div>
+      </div>
+
+      <div id="s28" class="card open" data-search="chaining hash table linked list load factor deletion straightforward">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q28</span>
+          <span class="card-title">Chaining</span>
+          <span class="verdict neutral">EXPLAIN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Each table slot holds a linked list (chain) of all elements hashing to that slot. Load factor \(\alpha = n/m\) can exceed 1. Simple to implement — deletion is standard linked-list deletion. Expected search time under simple uniform hashing:</p>
+          <div class="big-answer">Θ(1 + α)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 29 ============ -->
+    <section class="qsection" id="s29">
+      <div class="qsection-head"><span class="qsection-num">Q29</span><h2>GCD Recurrence — Euclid's Algorithm</h2></div>
+      <div class="card open" data-search="gcd greatest common divisor euclid recurrence fibonacci log n">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q29</span>
+          <span class="card-title">Recurrence and running time</span>
+          <span class="verdict neutral">SOLVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>GCD(m, n):
+  if m mod n == 0:
+      return n
+  else:
+      return GCD(n, m mod n)</pre>
+          <div class="answer-block">
+            <div class="label-row">A. The recurrence</div>
+            <p>The recursive call replaces (m, n) with (n, m mod n). The standard textbook framing (CLRS-style) expresses running time as:</p>
+            <div class="big-answer">T(n) = T(m mod n) + O(1)</div>
+            <p>Or, using the worst-case per-step bound (consecutive Fibonacci numbers trigger the most recursive calls before reaching remainder 0):</p>
+            <div class="big-answer">T(n) = T(n−1) + O(1) &nbsp;(worst-case bound)</div>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">B. Solving it</div>
+            <p>GCD's worst case occurs on consecutive Fibonacci numbers — the number of recursive calls k before termination satisfies \(n \geq \text{Fib}(k) \approx \varphi^k/\sqrt5\), so \(k = O(\log n)\). Each recursive call does O(1) work (one mod operation) outside the recursive call itself:</p>
+            <div class="big-answer">T(n) = Θ(log n)</div>
+            <p style="margin-top:8px;color:var(--text-faint);font-size:12.5px;">(More precisely: O(log n) calls. If the cost of the mod operation on very large numbers is counted as non-constant, multiply by cost-per-mod — but for the standard CS-course treatment, T(n) = Θ(log n) is the expected answer.)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 30 ============ -->
+    <section class="qsection" id="s30">
+      <div class="qsection-head"><span class="qsection-num">Q30</span><h2>Hash Authentication — Adversary Success Probability</h2></div>
+      <div class="card open" data-search="alice bob hash authentication tag universal hash family adversary probability 1/p wegman carter">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q30</span>
+          <span class="card-title">Universal hashing for message authentication</span>
+          <span class="verdict neutral">SOLVE</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>This is the <strong>universal hashing collision bound</strong> applied to authentication (a Wegman–Carter MAC).</p></div>
+          <div class="answer-block">
+            <div class="label-row">Setup</div>
+            <p>Adversary intercepts (m, t) with t = h(m), and wants to forge (m', t') with m' ≠ m such that t' = h(m'), without knowing which \(h \in H\) was secretly chosen.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Reasoning</div>
+            <p>Since h maps to \(\mathbb{Z}_p\) and H is a universal family, for any fixed pair of distinct messages \(m \neq m'\), the number of \(h \in H\) for which \(h(m)=h(m')\) is at most \(|H|/p\) — exactly the universal hashing collision property (\(\Pr[h(k)=h(l)] \leq 1/m\)), here with p in place of m.</p>
+            <p>The adversary doesn't need \(h(m')=h(m)\) — they've observed \(t=h(m)\) and just need to guess \(t'=h(m')\) correctly for the <em>same</em> secret h. With no information narrowing down which specific h was picked beyond the one observed pair, and t' must land on exactly one of p possible tag values:</p>
+          </div>
+          <div class="big-answer">P(adversary succeeds) ≤ 1/p</div>
+          <div class="answer-block"><p style="margin-top:6px;">This holds <strong>regardless of the adversary's computational power</strong> — the entire point of universal hashing for authentication: security depends only on the size of the tag space p, not on computational hardness assumptions.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 31 ============ -->
+    <section class="qsection" id="s31">
+      <div class="qsection-head"><span class="qsection-num">Q31</span><h2>BST Search Sequences — Which Is Impossible</h2></div>
+      <p class="qsection-sub">Searching for 363 in a BST with values 1–1000. A valid sequence must monotonically converge toward 363 — each step must stay within the bound established by every prior step, since going left/right at a node bounds every subsequent value in that subtree.</p>
+
+      <div class="card open" data-search="bst search sequence 924 220 911 244 898 258 362 363 invalid bound violation">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">a</span>
+          <span class="card-title">924, 220, 911, 244, 898, 258, 362, 363</span>
+          <span class="verdict disprove">INVALID</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>924 (&gt;363) → 220 (&lt;363, go left, upper bound now 220) → <strong>911</strong>: violates the bound. Once we visit 220 (which is &lt; 363, so we went LEFT, meaning search continues in a subtree bounded above by 220), every subsequent node must be &lt; 220. 911 &gt; 220 breaks this immediately.</p></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="bst search sequence 925 202 911 240 912 245 363 invalid">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">b</span>
+          <span class="card-title">925, 202, 911, 240, 912, 245, 363</span>
+          <span class="verdict disprove">INVALID</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>925 → 202 (&lt;363, go left, bound &lt;925 tightens to &lt;202) → <strong>911</strong>: same problem — after visiting 202, 911 exceeds the upper bound of 202.</p></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="bst search sequence 2 399 387 219 266 382 381 278 363 valid possible">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">c</span>
+          <span class="card-title">2, 399, 387, 219, 266, 382, 381, 278, 363</span>
+          <span class="verdict prove">VALID</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>Trace the tightening bound (lo, hi) at each step:</p>
+          <div class="result-row"><span>2</span><span class="rtag safe">&lt;363, go right</span><span style="margin-left:auto;color:var(--text-faint)">bound &gt;2</span></div>
+          <div class="result-row"><span>399</span><span class="rtag safe">&gt;363, go left</span><span style="margin-left:auto;color:var(--text-faint)">bound (2, 399)</span></div>
+          <div class="result-row"><span>387</span><span class="rtag safe">&gt;363, go left</span><span style="margin-left:auto;color:var(--text-faint)">bound (2, 387)</span></div>
+          <div class="result-row"><span>219</span><span class="rtag safe">&lt;363, go right</span><span style="margin-left:auto;color:var(--text-faint)">bound (219, 387)</span></div>
+          <div class="result-row"><span>266</span><span class="rtag safe">&lt;363, go right</span><span style="margin-left:auto;color:var(--text-faint)">bound (266, 387)</span></div>
+          <div class="result-row"><span>382</span><span class="rtag safe">&gt;363, go left</span><span style="margin-left:auto;color:var(--text-faint)">bound (266, 382)</span></div>
+          <div class="result-row"><span>381</span><span class="rtag safe">&gt;363, go left</span><span style="margin-left:auto;color:var(--text-faint)">bound (266, 381)</span></div>
+          <div class="result-row"><span>278</span><span class="rtag safe">&lt;363, go right</span><span style="margin-left:auto;color:var(--text-faint)">bound (278, 381)</span></div>
+          <div class="result-row"><span>363</span><span class="rtag safe">found</span><span style="margin-left:auto;color:var(--text-faint)">fits (278, 381) ✓</span></div>
+          <p style="margin-top:10px;">Every step stays within tightening bounds — this sequence is a genuinely possible search path.</p></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="bst search sequence 935 278 347 621 299 392 358 363 invalid lower bound">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">d</span>
+          <span class="card-title">935, 278, 347, 621, 299, 392, 358, 363</span>
+          <span class="verdict disprove">INVALID</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p>935 (&gt;363, go left) → 278 (&lt;363, go right, bound (278, 935)) → 347 (&lt;363, go right, bound (347, 935)) → 621 (&gt;363, go left, bound (347, 621)) → <strong>299</strong>: violates the bound. 299 &lt; 347, but the lower bound is 347 (established when we went right past 347) — 299 falls below it.</p></div>
+        </div>
+      </div>
+
+      <div class="card open" data-search="bst search sequence answer summary a b d invalid c valid final">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">✓</span>
+          <span class="card-title">Final answer</span>
+          <span class="verdict neutral">SUMMARY</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+          <div class="answer-block"><p><strong>(a), (b), and (d) are all invalid</strong> — but if the question intends a single answer, <strong>(a)</strong> is the canonical "cannot happen" sequence typically cited for this classic CLRS-style problem (12.2-2), since it's the most immediately broken (violates the bound at step 3). Given the exam likely expects identification of all invalid ones:</p>
+          <div class="big-answer">a, b, and d are impossible — only c is a valid search sequence</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 32 ============ -->
+    <section class="qsection" id="s32">
+      <div class="qsection-head"><span class="qsection-num">Q32</span><h2>O(V) Simple Cycle Detection — Undirected Graph</h2></div>
+      <div class="card open" data-search="simple cycle undirected graph O(V) DFS back edge parent gray white black">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q32</span>
+          <span class="card-title">DFS with back-edge detection</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>HAS-SIMPLE-CYCLE(G):
+1  color[v] = WHITE for all v ∈ G.V
+2  for each vertex u ∈ G.V:
+3      if color[u] == WHITE:
+4          if DFS-VISIT-CYCLE(u, NIL) == TRUE:
+5              return TRUE
+6  return FALSE
+
+DFS-VISIT-CYCLE(u, parent):
+1  color[u] = GRAY
+2  for each v ∈ G.Adj[u]:
+3      if v == parent:
+4          continue                          // skip the edge we just came from
+5      if color[v] == GRAY:
+6          return TRUE                       // back edge found → cycle
+7      if color[v] == WHITE:
+8          if DFS-VISIT-CYCLE(v, u) == TRUE:
+9              return TRUE
+10 color[u] = BLACK
+11 return FALSE</pre>
+          <div class="answer-block">
+            <div class="label-row">Correctness</div>
+            <p>In an undirected graph, DFS finds a cycle if and only if it encounters a "back edge" — an edge to an already-visited (GRAY, currently on the recursion stack) vertex that is <strong>not</strong> the immediate parent. The edge to the parent is the same undirected edge just traversed, not a real cycle, so it must be explicitly skipped.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Running time — why O(V), not O(V+E)</div>
+            <p>Standard DFS is O(V+E), but here we only check for the <em>existence</em> of any cycle: if the graph has no cycle, it's a forest, so E ≤ V−1 — DFS visits O(V) vertices and O(E) ≤ O(V) edges in that case. If a cycle <em>is</em> found, we return immediately upon detecting the first back edge, without exploring the rest of the graph. Either way, total work is:</p>
+            <div class="big-answer">O(V)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 33 ============ -->
+    <section class="qsection" id="s33">
+      <div class="qsection-head"><span class="qsection-num">Q33</span><h2>Tree Diameter in O(V+E)</h2></div>
+      <div class="card open" data-search="tree diameter two BFS technique farthest vertex O(V+E) longest path">
+        <div class="card-head" onclick="toggleCard(this)">
+          <span class="card-tag">Q33</span>
+          <span class="card-title">Two-BFS technique</span>
+          <span class="verdict neutral">DESIGN</span>
+          <span class="chev">▸</span>
+        </div>
+        <div class="card-body">
+<pre>TREE-DIAMETER(T):
+1  pick any vertex s ∈ T.V
+2  (u, dist_u) = BFS-FARTHEST(T, s)      // find farthest vertex from s
+3  (v, dist_v) = BFS-FARTHEST(T, u)      // find farthest vertex from u
+4  return dist_v                          // this is the diameter
+
+BFS-FARTHEST(T, start):
+1  run BFS from start, computing dist[x] for all x ∈ T.V
+2  let f = vertex maximizing dist[f]
+3  return (f, dist[f])</pre>
+          <div class="answer-block">
+            <div class="label-row">Correctness — why any starting point works</div>
+            <p>In a tree, running BFS from <em>any</em> starting vertex s and finding the farthest vertex u from it guarantees u is one endpoint of <em>some</em> longest path (diameter path) in the tree. Running BFS again from u finds v, the true farthest vertex from u — and (u, v) is guaranteed to be a diameter-achieving pair. This is a well-known tree property, provable by contradiction: if u weren't a diameter endpoint, a longer path could be found, contradicting u being farthest from s.</p>
+          </div>
+          <div class="answer-block">
+            <div class="label-row">Running time</div>
+            <p>Two BFS calls, each O(V+E). Since it's a tree, E = V−1, so total is:</p>
+            <div class="big-answer">O(V+E) = O(V)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center;padding:40px 0 0;">
+      <div id="noResults" style="display:none;color:var(--text-faint);font-family:var(--mono);font-size:13px;padding:60px 0;">
+        No matches found. Try a different term.
+      </div>
+    </div>
+
+    <footer>
+      CS3112 · CSU Los Angeles · Instructor: Jungsoo Lim &nbsp;·&nbsp; Sample Final, Fall 2017 &nbsp;·&nbsp; Solutions compiled for review
+    </footer>
+
+  </main>
+</div>
+
+<div class="totop" id="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13V3M8 3L3 8M8 3L13 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+// ===== card toggle + progress tracking =====
+const TOTAL_PROBLEMS = 33;
+const reviewed = new Set(JSON.parse(localStorage.getItem('cs3112_reviewed') || '[]'));
+
+function updateProgress(){
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  const pct = Math.min(100, (reviewed.size / TOTAL_PROBLEMS) * 100);
+  fill.style.width = pct + '%';
+  text.textContent = reviewed.size + '/' + TOTAL_PROBLEMS;
+  document.querySelectorAll('.nav-check').forEach(el=>{
+    const key = el.getAttribute('data-check');
+    el.classList.toggle('done', reviewed.has(key));
+  });
+}
+
+function toggleCard(headEl){
+  const card = headEl.closest('.card');
+  card.classList.toggle('open');
+  // mark the enclosing section as "reviewed" once any card opens
+  const section = headEl.closest('.qsection');
+  if(section){
+    reviewed.add(section.id);
+    localStorage.setItem('cs3112_reviewed', JSON.stringify([...reviewed]));
+    updateProgress();
+  }
+}
+updateProgress();
+
+// ===== sidebar nav: click + scrollspy =====
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.qsection');
+
+navItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const target = document.getElementById(item.getAttribute('data-target'));
+    if(target){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      closeSidebar();
+    }
+  });
+});
+
+const spyObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navItems.forEach(n=>n.classList.toggle('active', n.getAttribute('data-target')===id));
+    }
+  });
+}, { rootMargin: '-80px 0px -70% 0px', threshold:0 });
+sections.forEach(s=>spyObserver.observe(s));
+
+// ===== mobile sidebar =====
+const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('backdrop');
+const menuToggle = document.getElementById('menuToggle');
+function openSidebar(){ sidebar.classList.add('open'); backdrop.classList.add('open'); }
+function closeSidebar(){ sidebar.classList.remove('open'); backdrop.classList.remove('open'); }
+menuToggle.addEventListener('click', ()=> sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+backdrop.addEventListener('click', closeSidebar);
+
+// ===== back to top =====
+const totop = document.getElementById('totop');
+window.addEventListener('scroll', ()=>{
+  totop.classList.toggle('show', window.scrollY > 600);
+});
+
+// ===== search =====
+const searchInput = document.getElementById('searchInput');
+const allCards = document.querySelectorAll('.card');
+const allSections = document.querySelectorAll('.qsection');
+const noResults = document.getElementById('noResults');
+
+function clearHighlights(){
+  document.querySelectorAll('mark.hl').forEach(m=>{
+    const parent = m.parentNode;
+    parent.replaceChild(document.createTextNode(m.textContent), m);
+    parent.normalize();
+  });
+}
+
+function runSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  clearHighlights();
+
+  if(q === ''){
+    allCards.forEach(c=>{ c.classList.remove('no-match'); });
+    allSections.forEach(s=>{ s.classList.remove('no-match'); });
+    noResults.style.display = 'none';
+    return;
+  }
+
+  let anyMatch = false;
+  allSections.forEach(section=>{
+    let sectionHasMatch = false;
+    const cardsInSection = section.querySelectorAll('.card');
+    cardsInSection.forEach(card=>{
+      const haystack = (card.getAttribute('data-search') || '') + ' ' + card.textContent.toLowerCase();
+      const match = haystack.toLowerCase().includes(q);
+      card.classList.toggle('no-match', !match);
+      if(match){
+        sectionHasMatch = true;
+        anyMatch = true;
+        card.classList.add('open');
+        // highlight in title only (safe, simple text)
+        const titleEl = card.querySelector('.card-title');
+        if(titleEl){
+          highlightText(titleEl, q);
+        }
+      }
+    });
+    // sections with no cards (shouldn't happen) or with matches
+    if(cardsInSection.length > 0){
+      section.classList.toggle('no-match', !sectionHasMatch);
+    } else {
+      const sectionText = section.textContent.toLowerCase();
+      const match = sectionText.includes(q);
+      section.classList.toggle('no-match', !match);
+      if(match) anyMatch = true;
+    }
+  });
+
+  noResults.style.display = anyMatch ? 'none' : 'block';
+}
+
+function highlightText(el, q){
+  // walk text nodes only, wrap first match
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+  let node;
+  while(node = walker.nextNode()){
+    const idx = node.textContent.toLowerCase().indexOf(q);
+    if(idx !== -1){
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + q.length);
+      const mark = document.createElement('mark');
+      mark.className = 'hl';
+      try{
+        range.surroundContents(mark);
+      }catch(e){ /* skip if it spans elements */ }
+      break;
+    }
+  }
+}
+
+searchInput.addEventListener('input', runSearch);
+
+// keyboard shortcut: "/" focuses search
+document.addEventListener('keydown', (e)=>{
+  if(e.key === '/' && document.activeElement !== searchInput){
+    e.preventDefault();
+    searchInput.focus();
+  }
+  if(e.key === 'Escape' && document.activeElement === searchInput){
+    searchInput.value = '';
+    runSearch();
+    searchInput.blur();
+  }
+});
+</script>
+
+</body>
+</html>
