@@ -1,5 +1,3 @@
-# studyAlgo
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,6 +96,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .badge {
