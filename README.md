@@ -142,7 +142,6 @@
       color: #1d4b61;
     }
 
-    /* subtle icon */
     .icon {
       display: inline-block;
       width: 1.2rem;
@@ -176,7 +175,6 @@
     </div>
 
     <div class="button-grid">
-      <!-- Final Exam Sample 1 -->
       <a 
         href="https://rojz23.github.io/studyAlgo/sample_final_solutions.html" 
         target="_blank" 
@@ -191,7 +189,6 @@
         <span class="arrow">→</span>
       </a>
 
-      <!-- Final Exam Sample 2 -->
       <a 
         href="https://rojz23.github.io/studyAlgo/index%20(4).html" 
         target="_blank" 
