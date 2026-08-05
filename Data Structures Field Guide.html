@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Structures Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12151b;
+  --surface:#1a1e27;
+  --surface-2:#212633;
+  --border:#2c3140;
+  --border-soft:#242938;
+  --text:#e9e7e0;
+  --text-dim:#9aa0af;
+  --text-faint:#6b7180;
+
+  --hash:#e8a33d;
+  --hash-dim:#4a3a20;
+  --bst:#4fb0a5;
+  --bst-dim:#1f3a37;
+  --rbt:#d6555a;
+  --rbt-dim:#3d2224;
+  --btree:#6c8ef5;
+  --btree-dim:#242e4d;
+  --mst:#6fcf7c;
+  --mst-dim:#233a28;
+
+  --accent: var(--hash);
+  --accent-dim: var(--hash-dim);
+
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'IBM Plex Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.55;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size:40px 40px;
+  background-attachment:fixed;
+  min-height:100vh;
+}
+
+::selection{background:var(--accent); color:#14171d;}
+
+a{color:var(--accent);}
+
+/* ---------- Layout shell ---------- */
+.shell{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  min-height:100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  background:rgba(18,21,27,0.85);
+  backdrop-filter:blur(6px);
+  border-right:1px solid var(--border);
+  padding:28px 18px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.brand{
+  display:block;
+  margin-bottom:6px;
+  cursor:pointer;
+  border:none;
+  background:none;
+  text-align:left;
+  padding:0;
+}
+.brand .kicker{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.14em;
+  color:var(--text-faint);
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:6px;
+}
+.brand .title{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:20px;
+  color:var(--text);
+  line-height:1.2;
+}
+.brand .title em{
+  font-style:normal;
+  color:var(--accent);
+}
+.sidebar-sub{
+  font-size:12.5px;
+  color:var(--text-faint);
+  margin:0 0 26px;
+}
+
+.topic-nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+.topic-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:10px;
+  padding:10px 12px;
+  cursor:pointer;
+  color:var(--text-dim);
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:500;
+  transition:background .15s ease, color .15s ease, border-color .15s ease;
+}
+.topic-btn:hover{background:var(--surface); color:var(--text);}
+.topic-btn.active{
+  background:var(--surface-2);
+  border-color:var(--border);
+  color:var(--text);
+}
+.topic-btn .dot{
+  width:9px;height:9px;border-radius:2px;flex:none;
+  background:var(--dot-color, var(--accent));
+  transform:rotate(45deg);
+}
+.topic-btn .num{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  color:var(--text-faint);
+  margin-left:auto;
+}
+
+.sidebar-foot{
+  margin-top:28px;
+  padding-top:18px;
+  border-top:1px solid var(--border);
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+  line-height:1.7;
+}
+
+/* ---------- Main ---------- */
+main{padding:0; min-width:0;}
+.view{display:none;}
+.view.active{display:block;}
+
+/* Home hero */
+.home-hero{
+  padding:64px 56px 40px;
+  max-width:1180px;
+}
+.home-hero .eyebrow{
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:18px;
+}
+.home-hero h1{
+  font-family:var(--font-display);
+  font-size:52px;
+  line-height:1.05;
+  font-weight:700;
+  margin:0 0 20px;
+  max-width:820px;
+}
+.home-hero h1 .rot{
+  display:inline-block;
+  color:var(--bg);
+  background:var(--hash);
+  padding:2px 12px;
+  transform:rotate(-1.2deg);
+}
+.home-hero p.lede{
+  font-size:16.5px;
+  color:var(--text-dim);
+  max-width:560px;
+  margin:0 0 40px;
+}
+
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(210px,1fr));
+  gap:16px;
+  padding:0 56px 64px;
+  max-width:1180px;
+}
+.topic-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px 20px 20px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .15s ease, border-color .15s ease;
+}
+.topic-card:hover{transform:translateY(-3px); border-color:var(--card-color);}
+.topic-card .idx{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+  margin-bottom:16px;
+  display:block;
+}
+.topic-card h3{
+  font-family:var(--font-display);
+  font-size:19px;
+  margin:0 0 8px;
+  color:var(--text);
+}
+.topic-card p{
+  font-size:13px;
+  color:var(--text-dim);
+  margin:0 0 18px;
+}
+.topic-card .icon{margin-bottom:14px; height:44px;}
+.topic-card .go{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--card-color);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* Topic view */
+.topic-view{padding:44px 56px 80px; max-width:1180px;}
+.topic-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.topic-head .label{
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:10px;
+  display:block;
+}
+.topic-head h2{
+  font-family:var(--font-display);
+  font-size:38px;
+  margin:0;
+  font-weight:700;
+}
+.topic-head .back{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--text-faint);
+  background:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+.topic-head .back:hover{color:var(--text); border-color:var(--text-faint);}
+.topic-dek{color:var(--text-dim); font-size:15px; max-width:680px; margin:14px 0 30px;}
+
+.subtabs{
+  display:flex;
+  gap:4px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:32px;
+  flex-wrap:wrap;
+}
+.subtab{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  letter-spacing:0.02em;
+  text-transform:uppercase;
+  background:none;
+  border:none;
+  color:var(--text-faint);
+  padding:10px 16px 12px;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.subtab:hover{color:var(--text-dim);}
+.subtab.active{color:var(--accent); border-bottom-color:var(--accent);}
+
+.subview{display:none;}
+.subview.active{display:block;}
+
+/* Generic content components */
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:22px 24px;
+  margin-bottom:18px;
+}
+.panel h4{
+  font-family:var(--font-display);
+  font-size:16px;
+  margin:0 0 12px;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.panel h4 .tag{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--accent);
+  background:var(--accent-dim);
+  border-radius:5px;
+  padding:2px 7px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.panel p{margin:0 0 10px; font-size:14px; color:var(--text-dim);}
+.panel p:last-child{margin-bottom:0;}
+.panel ul, .panel ol{margin:0 0 10px; padding-left:20px; font-size:14px; color:var(--text-dim);}
+.panel li{margin-bottom:6px;}
+.panel li:last-child{margin-bottom:0;}
+.panel strong{color:var(--text); font-weight:600;}
+
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.three-col{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+@media (max-width:820px){.two-col,.three-col{grid-template-columns:1fr;}}
+
+code, .mono{font-family:var(--font-mono);}
+.inline-code{
+  font-family:var(--font-mono);
+  font-size:0.92em;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:1px 6px;
+  color:var(--accent);
+}
+pre.code-block{
+  font-family:var(--font-mono);
+  font-size:13px;
+  line-height:1.65;
+  background:#0e1015;
+  border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  border-radius:8px;
+  padding:16px 18px;
+  overflow-x:auto;
+  color:#d7d5cc;
+  margin:0 0 12px;
+}
+pre.code-block .ln{color:var(--text-faint); user-select:none; display:inline-block; width:22px;}
+pre.code-block .kw{color:var(--accent);}
+pre.code-block .cm{color:var(--text-faint); font-style:italic;}
+
+table.data-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13.5px;
+  margin:4px 0 12px;
+}
+table.data-table th, table.data-table td{
+  border:1px solid var(--border);
+  padding:8px 12px;
+  text-align:left;
+}
+table.data-table th{
+  background:var(--surface-2);
+  font-family:var(--font-mono);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--text-dim);
+}
+table.data-table td{color:var(--text-dim);}
+table.data-table td strong{color:var(--text);}
+
+.badge-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+.badge{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:4px 12px;
+  color:var(--text-dim);
+  background:var(--surface-2);
+}
+.badge strong{color:var(--accent); font-weight:600;}
+
+/* Cheat sheet quick-grid */
+.quickgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;}
+
+/* Practice problems */
+.problem{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px 22px;
+  margin-bottom:16px;
+}
+.problem .phead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.problem .pnum{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--accent);
+  letter-spacing:.05em;
+}
+.problem .diff{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  padding:2px 9px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  color:var(--text-faint);
+}
+.problem .ptext{font-size:14.5px; color:var(--text); margin:0 0 14px;}
+.problem .ptext code{color:var(--accent);}
+.reveal-btn{
+  font-family:var(--font-mono);
+  font-size:12px;
+  background:var(--accent-dim);
+  color:var(--accent);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+.reveal-btn:hover{filter:brightness(1.15);}
+.solution{
+  display:none;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px dashed var(--border);
+  font-size:14px;
+  color:var(--text-dim);
+}
+.solution.shown{display:block;}
+.solution p{margin:0 0 8px; color:var(--text-dim);}
+.solution p:last-child{margin-bottom:0;}
+.solution strong{color:var(--text);}
+
+/* small helper */
+.note-box{
+  border-left:3px solid var(--accent);
+  background:var(--surface-2);
+  border-radius:0 8px 8px 0;
+  padding:12px 16px;
+  font-size:13.5px;
+  color:var(--text-dim);
+  margin:0 0 14px;
+}
+
+footer.sitefoot{
+  text-align:center;
+  padding:30px 20px 50px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;}
+  .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border);}
+  .home-hero, .card-grid, .topic-view{padding-left:24px; padding-right:24px;}
+  .home-hero h1{font-size:36px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <button class="brand" onclick="goHome()">
+      <span class="kicker">CS312 &middot; Reference</span>
+      <span class="title">Data Structures<br><em>Field Guide</em></span>
+    </button>
+    <p class="sidebar-sub">Cheat sheets, notes, worked examples &amp; practice problems.</p>
+    <ul class="topic-nav" id="topicNav"></ul>
+    <div class="sidebar-foot">
+      05 TOPICS<br>
+      HASH &middot; BST &middot; RBT &middot; B-TREE &middot; MST
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main">
+    <!-- HOME VIEW -->
+    <section class="view active" id="view-home">
+      <div class="home-hero">
+        <span class="eyebrow">// index</span>
+        <h1>Five structures.<br>One <span class="rot">field guide</span>.</h1>
+        <p class="lede">A compact reference for hash tables, binary search trees, red-black trees, B-trees, and minimum spanning trees — built for review, not for reading cover to cover.</p>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+    </section>
+
+    <!-- TOPIC VIEWS INJECTED BELOW -->
+    <div id="topicViews">
+
+    <!-- ============================================================ -->
+    <!-- HASH TABLES -->
+    <!-- ============================================================ -->
+    <section class="view" id="view-hash" style="--accent:var(--hash); --accent-dim:var(--hash-dim);">
+      <div class="topic-view">
+        <div class="topic-head">
+          <div>
+            <span class="label">01 / Hash Tables</span>
+            <h2>Hash Tables</h2>
+          </div>
+          <button class="back" onclick="goHome()">&larr; ALL TOPICS</button>
+        </div>
+        <p class="topic-dek">A generalization of an array: instead of indexing directly by key, compute a function of the key — a <strong style="color:var(--text)">hash function</strong> — and index by that. Trades guaranteed O(1) direct addressing for O(1) <em>expected</em> time using far less space.</p>
+
+        <div class="subtabs">
+          <button class="subtab active" onclick="showSub('hash','cheat',this)">Cheat Sheet</button>
+          <button class="subtab" onclick="showSub('hash','notes',this)">Notes</button>
+          <button class="subtab" onclick="showSub('hash','examples',this)">Examples</button>
+          <button class="subtab" onclick="showSub('hash','practice',this)">Practice</button>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <div class="subview active" id="sub-hash-cheat">
+          <div class="quickgrid">
+            <div class="panel">
+              <h4>Direct Addressing <span class="tag">baseline</span></h4>
+              <p>Array <span class="inline-code">T</span> indexed directly by key: <span class="inline-code">T[k] = x</span>. O(1) per operation, but needs one slot per possible key in the universe <span class="inline-code">U</span>.</p>
+            </div>
+            <div class="panel">
+              <h4>Load Factor</h4>
+              <p><span class="inline-code">&alpha; = n / m</span> &mdash; n = elements stored, m = table size (number of slots / linked lists). Drives every average-case bound below.</p>
+            </div>
+            <div class="panel">
+              <h4>Good Hash Function</h4>
+              <p>Satisfies <strong>simple uniform hashing</strong>: each key equally likely to hash to any of the m slots, independent of other keys.</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h4>Running Times</h4>
+            <table class="data-table">
+              <tr><th>Method</th><th>Search (avg)</th><th>Search (worst)</th><th>Insert</th><th>Delete</th></tr>
+              <tr><td>Chaining</td><td>&Theta;(1 + &alpha;)</td><td>&Theta;(n)</td><td>O(1)</td><td>O(1)&dagger;</td></tr>
+              <tr><td>Open addressing</td><td>&le; 1/(1&minus;&alpha;)</td><td>&Theta;(n)</td><td>&le; 1/(1&minus;&alpha;)</td><td>&mdash;&Dagger;</td></tr>
+            </table>
+            <p style="font-size:12.5px;">&dagger; O(1) worst-case with doubly linked lists. &Dagger; Open addressing needs a <span class="inline-code">DELETED</span> sentinel, not plain NIL, or probe sequences break.</p>
+          </div>
+
+          <div class="two-col">
+            <div class="panel">
+              <h4>Hash Functions</h4>
+              <ul>
+                <li><strong>Division:</strong> <span class="inline-code">h(k) = k mod m</span>. Pick m prime, not close to a power of 2.</li>
+                <li><strong>Multiplication:</strong> <span class="inline-code">h(k) = &lfloor;m(kA mod 1)&rfloor;</span>, 0 &lt; A &lt; 1. m's exact value doesn't matter; Knuth suggests A &asymp; (&radic;5&minus;1)/2.</li>
+                <li><strong>Universal:</strong> <span class="inline-code">h<sub>ab</sub>(k) = ((ak+b) mod p) mod m</span>, p prime &gt; all keys and &gt; m. Pick a,b randomly each run &rarr; defeats adversarial key sets.</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h4>Collision Resolution</h4>
+              <ul>
+                <li><strong>Chaining:</strong> each slot is a linked list of colliding elements.</li>
+                <li><strong>Linear probing:</strong> <span class="inline-code">h(k,i) = (h'(k)+i) mod m</span>. Suffers <em>primary clustering</em>.</li>
+                <li><strong>Quadratic probing:</strong> <span class="inline-code">h(k,i) = (h'(k)+c<sub>1</sub>i+c<sub>2</sub>i&sup2;) mod m</span>. Suffers <em>secondary clustering</em>.</li>
+                <li><strong>Double hashing:</strong> <span class="inline-code">h(k,i) = (h<sub>1</sub>(k)+i&middot;h<sub>2</sub>(k)) mod m</span>, h<sub>2</sub>(k) must be relatively prime to m.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h4>Perfect Hashing</h4>
+            <p>Two-level scheme giving <strong>O(1) worst-case</strong> search on a static key set: level 1 is ordinary universal hashing with chaining into secondary tables S<sub>j</sub>; level 2 sizes each S<sub>j</sub> to (number of keys in it)&sup2; and rehashes with a fresh universal function until zero collisions occur inside it. Expected number of collisions across the whole structure is &lt; &frac12;, so a collision-free level-2 function is found quickly.</p>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="subview" id="sub-hash-notes">
+          <div class="panel">
+            <h4>Why not just direct-address?</h4>
+            <p>Direct addressing needs an array sized to the whole key universe U. When the number of keys actually in use, n, is much smaller than |U| — or the keys aren't small integers at all — allocating |U| slots wastes space or is outright impossible. A hash table instead uses &Theta;(n) space: an array sized proportional to the number of keys you expect to store, plus a hash function <span class="inline-code">h: U &rarr; {0, ..., m&minus;1}</span> that maps each key down into that smaller range.</p>
+            <p>The cost of shrinking the index space is that two distinct keys can land on the same slot — a <strong>collision</strong>. Every hash table design is really a design choice about (1) what hash function to use and (2) how to resolve collisions.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Chaining &mdash; analysis</h4>
+            <p>Under simple uniform hashing, the expected length of any chain is the load factor &alpha; = n/m. An unsuccessful search examines an average of &alpha; elements before hitting the end of a list (expected &Theta;(1+&alpha;) counting the O(1) to compute h(k)). A successful search is essentially the same, since it's symmetric with insertion order — also &Theta;(1+&alpha;).</p>
+            <p>If the table is built so that n = O(m), then &alpha; = O(1), and every dictionary operation runs in O(1) time on average.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Hash functions &mdash; design notes</h4>
+            <p><strong>Division method:</strong> fast (one mod operation) but sensitive to the choice of m. Avoid m = 2<sup>p</sup> (h(k) then just extracts the low p bits of k and ignores the rest — bad if keys aren't uniformly random in those bits). A prime not close to a power of 2 is the safe default.</p>
+            <p><strong>Multiplication method:</strong> value of m is not critical (a power of 2 is fine and fast to implement). Multiply key k by a constant A &isin; (0,1), take the fractional part, scale by m, floor it. Slower than division in practice but more forgiving.</p>
+            <p><strong>Random / universal hashing:</strong> defends against an adversary who knows your hash function in advance and chooses keys to force worst-case collisions. Instead of a single fixed function, pick one at random, independently of the keys, from a carefully designed family H. A family is <em>universal</em> if for any two distinct keys k &ne; l, the number of h &isin; H with h(k) = h(l) is at most |H|/m — i.e. the collision probability for any fixed pair is at most 1/m, exactly what you'd get from a truly random function.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Open addressing &mdash; mechanics</h4>
+            <p>No pointers: every element lives inside the table itself, so the table can fill up (&alpha; &le; 1 always). To insert key k, probe slots in the sequence <span class="inline-code">h(k,0), h(k,1), ..., h(k,m&minus;1)</span> — a permutation of {0,...,m&minus;1} — until an empty slot is found. Searching follows the identical sequence, stopping either at a slot holding k (success) or the first empty slot (failure, since if k had been inserted it would have stopped there too).</p>
+            <p><strong>Deletion is the tricky part.</strong> You cannot just write NIL into a deleted slot — a later search for a different key k&prime; that originally probed through k's slot during insertion would incorrectly stop early and report "not found." Fix: mark the slot with a special <span class="inline-code">DELETED</span> value. Search treats DELETED as occupied (keep probing past it); insertion treats DELETED as empty (reusable).</p>
+          </div>
+
+          <div class="panel">
+            <h4>Practical considerations</h4>
+            <p>On real hardware, memory hierarchy matters: caches are small and fast, and a cache line (e.g. 64 contiguous bytes) is much cheaper to keep reusing than to re-fetch from main memory. Linear probing looks worse than double hashing in the pure RAM cost model, but its successive probes usually land in the same cache line, so it can outperform double hashing in practice.</p>
+          </div>
+        </div>
+
+        <!-- EXAMPLES -->
+        <div class="subview" id="sub-hash-examples">
+          <div class="panel">
+            <h4>Multiplication method, worked</h4>
+            <p>k = 123456, m = 2<sup>14</sup>, A = (&radic;5&minus;1)/2 style constant &asymp; 2,654,435,769 / 2<sup>32</sup>.</p>
+            <pre class="code-block">h(123456) = floor( 2^14 * (123456 * 2,654,435,769 / 2^32  mod 1) )
+          = floor( 2^14 * (17,612,864 / 2^32) )
+          = floor( 2^14 * 0.004100814 )
+          = floor( 67.18774 )
+          = 67</pre>
+            <p>Second worked case, k = 123456, m = 10,000, A = (&radic;5&minus;1)/2:</p>
+            <pre class="code-block">h(123456) = floor( 10000 * (123456 * A mod 1) )
+          = floor( 10000 * 0.0041151... )
+          = floor( 41.151 )
+          = 41</pre>
+          </div>
+
+          <div class="panel">
+            <h4>Universal hashing, worked</h4>
+            <p>Family H<sub>pm</sub>: h<sub>ab</sub>(k) = ((ak + b) mod p) mod m. Take p = 17, m = 6, a = 3, b = 4, k = 8:</p>
+            <pre class="code-block">h(3,4)(8) = ((3*8 + 4) mod 17) mod 6
+          = (28 mod 17) mod 6
+          = 11 mod 6
+          = 5</pre>
+          </div>
+
+          <div class="panel">
+            <h4>Double hashing, worked</h4>
+            <p>Table size m = 13. h<sub>1</sub>(k) = k mod 13, h<sub>2</sub>(k) = 1 + (k mod 11). Insert k = 14:</p>
+            <pre class="code-block">h1(14) = 14 mod 13 = 1
+h2(14) = 1 + (14 mod 11) = 1 + 3 = 4
+
+probe sequence: 1, 5, 9, 0, 4, 8, ...  (i.e. 1, 1+4, 1+8, 1+12 mod 13, ...)</pre>
+            <p>We probe slot 1 first; if occupied, slot (1+4) mod 13 = 5; then (1+8) mod 13 = 9; and so on, stepping by h<sub>2</sub>(k) = 4 each time.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Perfect hashing &mdash; collision expectation</h4>
+            <p>With n keys hashed into a table of size n&sup2;, the probability any given pair collides is 1/n&sup2;. Let X count collisions over all C(n,2) pairs:</p>
+            <pre class="code-block">E[X] = C(n,2) * 1/n^2
+     = [n(n-1)/2] * 1/n^2
+     = (n-1)/(2n)
+     &lt; 1/2</pre>
+            <p>Expected collisions are under &frac12; — so a random function from a universal family has better-than-even odds of producing zero collisions on the first try, and repeated tries converge fast.</p>
+          </div>
+        </div>
+
+        <!-- PRACTICE -->
+        <div class="subview" id="sub-hash-practice">
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 1</span><span class="diff">Warm-up</span></div>
+            <p class="ptext">A hash table has m = 11 slots and uses the division method <code>h(k) = k mod m</code>. Insert keys 15, 26, 7, 34, 22 with chaining, in that order. What does each chain contain?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>h(15)=4, h(26)=4, h(7)=7, h(34)=1, h(22)=0.</p>
+              <p><strong>Slot 0:</strong> 22 &nbsp; <strong>Slot 1:</strong> 34 &nbsp; <strong>Slot 4:</strong> 15 &rarr; 26 (26 chains after 15, both hash to 4) &nbsp; <strong>Slot 7:</strong> 7. All other slots empty.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 2</span><span class="diff">Core</span></div>
+            <p class="ptext">Table size m = 13, linear probing with <code>h'(k) = k mod 13</code>. Insert 18, 26, 5, 44, 31 in order. Give the final slot of each key.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>h'(18)=5 &rarr; slot 5 (empty, placed).</p>
+              <p>h'(26)=0 &rarr; slot 0 (empty, placed).</p>
+              <p>h'(5)=5 &rarr; slot 5 occupied &rarr; probe 6 (empty, placed).</p>
+              <p>h'(44)=5 &rarr; slot 5 occupied &rarr; 6 occupied &rarr; probe 7 (empty, placed).</p>
+              <p>h'(31)=5 &rarr; slot 5,6,7 occupied &rarr; probe 8 (empty, placed).</p>
+              <p><strong>Final:</strong> 26&rarr;0, 18&rarr;5, 5&rarr;6, 44&rarr;7, 31&rarr;8. This clustering (5,6,7,8 all filled from one popular slot) is exactly primary clustering.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 3</span><span class="diff">Core</span></div>
+            <p class="ptext">Using double hashing with m = 13, <code>h1(k) = k mod 13</code>, <code>h2(k) = 1 + (k mod 11)</code>, compute the first three probes for key k = 25.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>h1(25) = 25 mod 13 = 12.</p>
+              <p>h2(25) = 1 + (25 mod 11) = 1 + 3 = 4.</p>
+              <p>Probe sequence: i=0 &rarr; 12; i=1 &rarr; (12+4) mod 13 = 3; i=2 &rarr; (12+8) mod 13 = 7.</p>
+              <p><strong>First three probes: 12, 3, 7.</strong></p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 4</span><span class="diff">Conceptual</span></div>
+            <p class="ptext">A table has load factor &alpha; = 0.9 under open addressing with uniform hashing. About how many probes does an unsuccessful search take? What about &alpha; = 0.5? What does this tell you about keeping open-addressed tables sparse?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Expected probes for an unsuccessful search &le; 1/(1&minus;&alpha;).</p>
+              <p>&alpha; = 0.9 &rarr; 1/(1&minus;0.9) = 1/0.1 = <strong>10 probes</strong>.</p>
+              <p>&alpha; = 0.5 &rarr; 1/(1&minus;0.5) = <strong>2 probes</strong>.</p>
+              <p>Growth is not linear in &alpha; — it blows up as &alpha; &rarr; 1. Open-addressed tables should typically be resized well before they get close to full (commonly around &alpha; &asymp; 0.7&ndash;0.75) to keep probe counts small.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 5</span><span class="diff">Challenge</span></div>
+            <p class="ptext">Explain why <code>h2(k)</code> in double hashing must be relatively prime to the table size m (e.g. why choosing m a power of 2 and h2(k) always even is dangerous).</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>The probe sequence is <code>(h1(k) + i&middot;h2(k)) mod m</code> for i = 0..m&minus;1. This sequence visits every slot 0..m&minus;1 exactly once <em>only if</em> gcd(h2(k), m) = 1 &mdash; i.e. h2(k) generates the full cyclic group mod m.</p>
+              <p>If gcd(h2(k), m) = d &gt; 1, the probe sequence only ever visits m/d distinct slots (a coset), no matter how many times you probe. E.g. m = 16 and h2(k) always even means only 8 of the 16 slots are ever reachable — insertion can fail with "table full" even when half the table is empty.</p>
+              <p>Common fixes: choose m prime and let h2(k) return a value in [1, m&minus;1], or force h2(k) to always be odd when m is a power of 2.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- BINARY SEARCH TREES -->
+    <!-- ============================================================ -->
+    <section class="view" id="view-bst" style="--accent:var(--bst); --accent-dim:var(--bst-dim);">
+      <div class="topic-view">
+        <div class="topic-head">
+          <div>
+            <span class="label">02 / Binary Search Trees</span>
+            <h2>Binary Search Trees</h2>
+          </div>
+          <button class="back" onclick="goHome()">&larr; ALL TOPICS</button>
+        </div>
+        <p class="topic-dek">A linked structure where every node satisfies the <strong style="color:var(--text)">binary-search-tree property</strong>: everything in the left subtree is &le; the node's key, everything in the right subtree is &ge; it. Every operation below runs in O(h), h = tree height.</p>
+
+        <div class="subtabs">
+          <button class="subtab active" onclick="showSub('bst','cheat',this)">Cheat Sheet</button>
+          <button class="subtab" onclick="showSub('bst','notes',this)">Notes</button>
+          <button class="subtab" onclick="showSub('bst','examples',this)">Examples</button>
+          <button class="subtab" onclick="showSub('bst','practice',this)">Practice</button>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <div class="subview active" id="sub-bst-cheat">
+          <div class="panel">
+            <h4>BST Property</h4>
+            <p>For node x: if y is in x's left subtree, <span class="inline-code">key[y] &le; key[x]</span>. If y is in x's right subtree, <span class="inline-code">key[y] &ge; key[x]</span>.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Operations &mdash; all O(h)</h4>
+            <table class="data-table">
+              <tr><th>Operation</th><th>Idea</th></tr>
+              <tr><td><strong>SEARCH(x,k)</strong></td><td>Compare k to key[x]; recurse left if k&lt;key[x], right if k&gt;key[x], return x if equal.</td></tr>
+              <tr><td><strong>MINIMUM(x)</strong></td><td>Follow <span class="inline-code">left</span> pointers until NIL.</td></tr>
+              <tr><td><strong>MAXIMUM(x)</strong></td><td>Follow <span class="inline-code">right</span> pointers until NIL.</td></tr>
+              <tr><td><strong>SUCCESSOR(x)</strong></td><td>If right subtree exists: MINIMUM(right[x]). Else: walk up while x is a right child.</td></tr>
+              <tr><td><strong>PREDECESSOR(x)</strong></td><td>Mirror image of successor (left subtree / walk up while a left child).</td></tr>
+              <tr><td><strong>INSERT(T,z)</strong></td><td>Walk down from root comparing keys; hang z off the NIL you fall off of.</td></tr>
+              <tr><td><strong>DELETE(T,z)</strong></td><td>3 cases &mdash; see Notes. Uses TRANSPLANT as a subroutine.</td></tr>
+            </table>
+          </div>
+
+          <div class="panel">
+            <h4>Tree Walks &mdash; all &Theta;(n)</h4>
+            <div class="three-col">
+              <div><strong style="color:var(--text)">Inorder</strong><br><span class="inline-code">left, root, right</span><br><span style="font-size:12.5px;">Visits keys in sorted order.</span></div>
+              <div><strong style="color:var(--text)">Preorder</strong><br><span class="inline-code">root, left, right</span><br><span style="font-size:12.5px;">Root printed first.</span></div>
+              <div><strong style="color:var(--text)">Postorder</strong><br><span class="inline-code">left, right, root</span><br><span style="font-size:12.5px;">Root printed last.</span></div>
+            </div>
+          </div>
+
+          <div class="note-box">On a tree built from n random insertions the expected height is O(lg n), giving O(lg n) expected operations &mdash; but a degenerate insertion order (e.g. sorted input) produces a linked-list-shaped tree with height &Theta;(n). This worst case is exactly what red-black trees fix.</div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="subview" id="sub-bst-notes">
+          <div class="panel">
+            <h4>Search</h4>
+            <pre class="code-block">TREE-SEARCH(x, k)
+1  if x == NIL or k == key[x]
+2      then return x
+3  if k &lt; key[x]
+4      then return TREE-SEARCH(left[x], k)
+5      else return TREE-SEARCH(right[x], k)</pre>
+            <p>Running time O(h). An iterative version unrolls the recursion into a <span class="inline-code">while</span> loop and typically runs faster in practice on most machines (no call-stack overhead).</p>
+          </div>
+
+          <div class="panel">
+            <h4>Minimum / Maximum</h4>
+            <pre class="code-block">TREE-MINIMUM(x)
+1  while left[x] != NIL
+2      do x &larr; left[x]
+3  return x
+
+TREE-MAXIMUM(x)
+1  while right[x] != NIL
+2      do x &larr; right[x]
+3  return x</pre>
+          </div>
+
+          <div class="panel">
+            <h4>Successor &amp; Predecessor</h4>
+            <p><strong>successor(x)</strong> = node y with the smallest key &gt; key[x].</p>
+            <ul>
+              <li><strong>Case 1:</strong> right[x] is non-empty &rarr; successor is TREE-MINIMUM(right[x]).</li>
+              <li><strong>Case 2:</strong> right[x] is empty &rarr; go up until you move up from a left child; that parent is the successor. (If you reach the root without ever being a left child, x was the maximum &mdash; no successor.)</li>
+            </ul>
+            <pre class="code-block">TREE-SUCCESSOR(x)
+1  if right[x] != NIL
+2      then return TREE-MINIMUM(right[x])
+3  y &larr; p[x]
+4  while y != NIL and x == right[y]
+5      do x &larr; y
+6         y &larr; p[y]
+7  return y</pre>
+            <p>Predecessor is the exact mirror: left subtree's maximum, or walk up while x is a left child.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Insertion</h4>
+            <p>Trace a path down from the root, going left or right by comparing the new value against each node's key, until falling off the tree (hitting NIL). Track a trailing pointer y to the last non-NIL node visited &mdash; that becomes the new node's parent.</p>
+            <pre class="code-block">TREE-INSERT(T, z)
+1  y &larr; NIL
+2  x &larr; root[T]
+3  while x != NIL
+4      do y &larr; x
+5         if key[z] &lt; key[x]
+6             then x &larr; left[x]
+7             else x &larr; right[x]
+8  p[z] &larr; y
+9  if y == NIL
+10     then root[T] &larr; z          &nbsp;// tree T was empty
+11     elseif key[z] &lt; key[y]
+12         then left[y] &larr; z
+13         else right[y] &larr; z</pre>
+          </div>
+
+          <div class="panel">
+            <h4>Deletion &mdash; three cases</h4>
+            <ol>
+              <li><strong>z has no children:</strong> just remove it (splice out).</li>
+              <li><strong>z has exactly one child:</strong> splice z out, linking that child directly to z's parent.</li>
+              <li><strong>z has two children:</strong> find z's successor y (which must be TREE-MINIMUM of z's right subtree, so y has no left child). Either y is z's right child (replace z by y directly), or y is deeper (replace y in its own position by y's right child, then move y into z's position with both of z's children).</li>
+            </ol>
+            <p>CLRS implements this cleanly with a <strong>TRANSPLANT</strong> helper that replaces the subtree rooted at u with the subtree rooted at v (rewiring u's parent to point at v):</p>
+            <pre class="code-block">TRANSPLANT(T, u, v)
+1  if p[u] == NIL
+2      then root[T] &larr; v
+3  elseif u == left[p[u]]
+4      then left[p[u]] &larr; v
+5      else right[p[u]] &larr; v
+6  if v != NIL
+7      then p[v] &larr; p[u]</pre>
+            <pre class="code-block">TREE-DELETE(T, z)
+1  if left[z] == NIL
+2      then TRANSPLANT(T, z, right[z])          // no left child
+3  elseif right[z] == NIL
+4      then TRANSPLANT(T, z, left[z])           // no right child
+5  else y &larr; TREE-MINIMUM(right[z])           // y = successor
+6      if p[y] != z
+7          then TRANSPLANT(T, y, right[y])
+8               right[y] &larr; right[z]
+9               p[right[y]] &larr; y
+10     TRANSPLANT(T, z, y)
+11     left[y] &larr; left[z]
+12     p[left[y]] &larr; y</pre>
+          </div>
+
+          <div class="panel">
+            <h4>Why height matters</h4>
+            <p>Every operation above costs O(h). For a random build, h = O(lg n) and everything is fast. But a plain BST gives <strong>no guarantee</strong> on h &mdash; inserting sorted data builds a degenerate chain of height &Theta;(n), making every operation O(n). Red-black trees (next topic) add a rebalancing rule that guarantees h = O(lg n) always.</p>
+          </div>
+        </div>
+
+        <!-- EXAMPLES -->
+        <div class="subview" id="sub-bst-examples">
+          <div class="panel">
+            <h4>Traversal example</h4>
+            <p>Given the tree with root 5, left child 3 (children 2, 4), right child 9 (children 7, ...):</p>
+            <pre class="code-block">          5
+        /   \
+       3     9
+      / \   /
+     2   4 7</pre>
+            <table class="data-table">
+              <tr><th>Walk</th><th>Output</th></tr>
+              <tr><td>Inorder</td><td>2, 3, 4, 5, 7, 9</td></tr>
+              <tr><td>Preorder</td><td>5, 3, 2, 4, 9, 7</td></tr>
+              <tr><td>Postorder</td><td>2, 4, 3, 7, 9, 5</td></tr>
+            </table>
+          </div>
+
+          <div class="panel">
+            <h4>TREE-SEARCH example</h4>
+            <p>Tree: root 15, left child 6 (children 3, 7 &mdash; 7 has child 13, which has child 9), right child 18 (right child 20). Searching for key 13:</p>
+            <pre class="code-block">path: 15 &rarr; 6 &rarr; 7 &rarr; 13   (found)</pre>
+            <p>At each step: 13 &lt; 15 &rarr; go left to 6; 13 &gt; 6 &rarr; go right to 7; 13 &gt; 7 &rarr; go right to 13; match.</p>
+          </div>
+
+          <div class="panel">
+            <h4>Successor / predecessor example</h4>
+            <p>Same tree (root 15, left subtree 6/3/7/13/9-ish, right subtree 18/20):</p>
+            <ul>
+              <li>successor(15) = TREE-MINIMUM(right subtree of 15) = 17 (the minimum of the right side).</li>
+              <li>successor(13) = 15 &mdash; 13 has no right child, so walk up: 13 is a right child of 7, keep going; 7 is a left child of 6... continue up until the first "left child" turn, landing on 15.</li>
+              <li>predecessor(9) = 7 &mdash; 9 has no left child, walk up until finding an ancestor where you moved up from a right child.</li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <h4>TREE-INSERT example</h4>
+            <p>Insert value 13 into a tree with root 12: x starts at root, y trails behind. 13 &gt; 12 &rarr; move right to 18; y = 12. 13 &lt; 18 &rarr; move left to 15; y = 18. 13 &lt; 15 &rarr; move left to 9; y = 15. 13 &gt; 9 &rarr; move right, hit NIL; y = 9. Loop ends, x = NIL, y = 9. Since 13 &gt; key[9], attach: <span class="inline-code">right[9] = 13</span>.</p>
+          </div>
+        </div>
+
+        <!-- PRACTICE -->
+        <div class="subview" id="sub-bst-practice">
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 1</span><span class="diff">Warm-up</span></div>
+            <p class="ptext">Insert the keys <code>10, 5, 15, 3, 7, 12, 18</code> into an empty BST in that order. Draw the resulting tree, then give its inorder traversal.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <pre class="code-block">          10
+        /    \
+       5      15
+      / \    /  \
+     3   7  12   18</pre>
+              <p><strong>Inorder:</strong> 3, 5, 7, 10, 12, 15, 18 (always sorted order for any valid BST &mdash; a good self-check).</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 2</span><span class="diff">Core</span></div>
+            <p class="ptext">Using the tree from Problem 1, what is <code>successor(7)</code>? What is <code>predecessor(15)</code>?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><strong>successor(7):</strong> 7 has no right child, so walk up. 7 is a right child of 5 &mdash; keep going. 5 is a left child of 10 &mdash; stop. <strong>Answer: 10.</strong></p>
+              <p><strong>predecessor(15):</strong> 15 has a left child (12), so predecessor = TREE-MAXIMUM(left subtree of 15) = <strong>12</strong>.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 3</span><span class="diff">Core</span></div>
+            <p class="ptext">Delete key 5 from the tree in Problem 1 (node 5 has two children: 3 and 7). Show the tree after deletion, using the TREE-DELETE algorithm.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>z = 5 has two children, so y = TREE-MINIMUM(right[z]) = TREE-MINIMUM(subtree rooted at 7) = 7 itself (7 has no left child). Since p[y] == z, we skip the extra transplant step (lines 6&ndash;9) and go straight to replacing z with y: TRANSPLANT(T, 5, 7), then left[7] &larr; left[5] = 3.</p>
+              <pre class="code-block">          10
+        /    \
+       7      15
+      /      /  \
+     3      12   18</pre>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 4</span><span class="diff">Conceptual</span></div>
+            <p class="ptext">Why does TREE-MINIMUM(right[z]) always have <em>no left child</em> when used as a successor during deletion? Why does that matter for correctness of TREE-DELETE?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>TREE-MINIMUM walks left pointers until it hits NIL &mdash; by construction the node it returns has <span class="inline-code">left = NIL</span>. That guarantees y (the successor) can be removed from its original spot with the simple one-child-or-no-child TRANSPLANT (line 7: <span class="inline-code">TRANSPLANT(T, y, right[y])</span>) without needing to recursively handle a two-children case for y itself. This is exactly what keeps deletion O(h) instead of needing recursion.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 5</span><span class="diff">Challenge</span></div>
+            <p class="ptext">You insert the keys <code>1, 2, 3, 4, 5, 6, 7</code> into an empty BST in that order. What is the height of the resulting tree, and what does this imply about worst-case TREE-SEARCH time on it?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Each new key is larger than everything already in the tree, so every node becomes the right child of the previous one &mdash; a straight chain: 1&rarr;2&rarr;3&rarr;4&rarr;5&rarr;6&rarr;7. Height h = n&minus;1 = 6.</p>
+              <p>Since every operation is O(h), search/insert/delete on this tree degrade to O(n) &mdash; identical to a linked list. This is precisely the worst case a plain BST cannot rule out, motivating balanced trees like red-black trees.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- RED-BLACK TREES -->
+    <!-- ============================================================ -->
+    <section class="view" id="view-rbt" style="--accent:var(--rbt); --accent-dim:var(--rbt-dim);">
+      <div class="topic-view">
+        <div class="topic-head">
+          <div>
+            <span class="label">03 / Red-Black Trees</span>
+            <h2>Red-Black Trees</h2>
+          </div>
+          <button class="back" onclick="goHome()">&larr; ALL TOPICS</button>
+        </div>
+        <p class="topic-dek">A binary search tree with one extra bit per node (its color) and five invariants that together guarantee height <strong style="color:var(--text)">O(lg n)</strong> &mdash; so search, insert, and delete are all O(lg n) worst-case, no matter the insertion order.</p>
+
+        <div class="subtabs">
+          <button class="subtab active" onclick="showSub('rbt','cheat',this)">Cheat Sheet</button>
+          <button class="subtab" onclick="showSub('rbt','notes',this)">Notes</button>
+          <button class="subtab" onclick="showSub('rbt','examples',this)">Examples</button>
+          <button class="subtab" onclick="showSub('rbt','practice',this)">Practice</button>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <div class="subview active" id="sub-rbt-cheat">
+          <div class="panel">
+            <h4>The 5 Properties</h4>
+            <ol>
+              <li>Every node is either <strong style="color:var(--rbt)">red</strong> or <strong>black</strong>.</li>
+              <li>The root is black.</li>
+              <li>Every leaf (NIL) is black.</li>
+              <li>If a node is red, both its children are black. <span style="color:var(--text-faint)">(no two reds in a row)</span></li>
+              <li>Every path from a node to its descendant leaves has the same number of black nodes (its <strong>black-height</strong>).</li>
+            </ol>
+          </div>
+          <div class="panel">
+            <h4>Height Bound</h4>
+            <p>A red-black tree with n internal nodes has height <span class="inline-code">h &le; 2 lg(n + 1)</span>. Property 4 forces at least half the nodes on any root-to-leaf path to be black, so black-height(root) &ge; h/2, giving n &ge; 2<sup>h/2</sup> &minus; 1 and the bound above.</p>
+          </div>
+          <div class="two-col">
+            <div class="panel">
+              <h4>Rotations</h4>
+              <p>O(1) local restructuring operations that preserve the BST property while changing which node is "on top." <strong>LEFT-ROTATE</strong> and <strong>RIGHT-ROTATE</strong> are mirror images. Every fixup is built entirely out of rotations + recolorings.</p>
+            </div>
+            <div class="panel">
+              <h4>Insert / Delete Fixup</h4>
+              <p>Ordinary BST-insert/delete can violate properties 1&ndash;5. <strong>RB-INSERT-FIXUP</strong> and <strong>RB-DELETE-FIXUP</strong> walk back up the tree, using the sibling/uncle's color to pick one of a small number of cases, each resolved in O(1) rotations before moving up &mdash; O(lg n) total.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="subview" id="sub-rbt-notes">
+          <div class="panel">
+            <h4>Why not a plain BST?</h4>
+            <p>Plain BST operations run in O(h), and h can be as bad as &Theta;(n) for adversarial insertion orders. A red-black tree adds bookkeeping (a color per node) and a rebalancing rule so that h is <em>always</em> O(lg n), guaranteeing O(lg n) worst-case for every dictionary operation.</p>
+          </div>
+
+          <div class="panel">
+            <h4>RIGHT-ROTATE(T, x)</h4>
+            <p>Pivots x down and its left child y up, keeping the BST property intact. LEFT-ROTATE is the exact mirror (swap left/right throughout).</p>
+            <pre class="code-block">RIGHT-ROTATE(T, x)
+1  y &larr; left[x]
+2  left[x] &larr; right[y]
+3  if right[y] != T.nil
+4      then p[right[y]] &larr; x
+5  p[y] &larr; p[x]
+6  if p[x] == T.nil
+7      then T.root &larr; y
+8  elseif x == right[p[x]]
+9      then right[p[x]] &larr; y
+10     else left[p[x]] &larr; y
+11 right[y] &larr; x
+12 p[x] &larr; y</pre>
+          </div>
+
+          <div class="panel">
+            <h4>RB-INSERT-FIXUP &mdash; the idea</h4>
+            <p>Insert z normally as in a plain BST, color it <strong style="color:var(--rbt)">red</strong> (least likely to break the black-height property), then repair. While z's parent is red (property 4 violated), look at z's <strong>uncle</strong> y = z.p.p.left (or .right, mirrored):</p>
+            <ul>
+              <li><strong>Case 1 &mdash; uncle y is red:</strong> recolor parent and uncle black, grandparent red, move z up to grandparent, keep fixing.</li>
+              <li><strong>Case 2 &mdash; uncle y is black, z is a "triangle" (z is a right child, parent is a left child):</strong> rotate to turn it into a "line" (Case 3).</li>
+              <li><strong>Case 3 &mdash; uncle y is black, z is a "line":</strong> recolor parent black / grandparent red, then rotate the grandparent. Done &mdash; loop terminates.</li>
+            </ul>
+            <pre class="code-block">RB-INSERT-FIXUP(T, z)
+16  y &larr; z.p.p.left
+17  if y.color == RED
+18      z.p.color &larr; BLACK
+19      y.color &larr; BLACK
+20      z.p.p.color &larr; RED
+21      z &larr; z.p.p
+22  else
+23      if z == z.p.left
+24          z &larr; z.p
+25          RIGHT-ROTATE(T, z)
+26      z.p.color &larr; BLACK
+27      z.p.p.color &larr; RED
+28      LEFT-ROTATE(T, z.p.p)
+29  T.root.color &larr; BLACK</pre>
+            <p>(Shown for the case where z's parent is a <em>left</em> child of the grandparent; the mirror case swaps left/right throughout. Line 29 always re-blackens the root in case it turned red.)</p>
+          </div>
+
+          <div class="panel">
+            <h4>Cost</h4>
+            <p>Each RB-INSERT-FIXUP loop iteration is O(1). Case 1 is the only one that continues the loop (moving z two levels up), so the loop runs O(lg n) times total; Cases 2&ndash;3 do at most one rotation and terminate. Overall insertion is O(lg n). Deletion follows the same shape &mdash; O(lg n) with more cases (an extra "doubly-black" concept) but the same O(lg n) bound.</p>
+          </div>
+        </div>
+
+        <!-- EXAMPLES -->
+        <div class="subview" id="sub-rbt-examples">
+          <div class="panel">
+            <h4>Height bound, worked</h4>
+            <p>For n = 1,000,000 internal nodes: <span class="inline-code">h &le; 2 lg(1,000,001) &asymp; 2 &times; 19.93 &asymp; 39.9</span>. So no matter how those million keys were inserted, the tree never gets taller than about 40 &mdash; compare to a degenerate BST, which could be a million deep.</p>
+          </div>
+          <div class="panel">
+            <h4>Case 1 walk-through (recoloring only)</h4>
+            <p>Insert z as a red left-left grandchild where z's uncle is red. Fixup recolors z's parent and uncle black, grandparent red, then continues the loop with z re-pointed at the grandparent &mdash; possibly triggering another fixup iteration further up if the grandparent's parent is also red. No rotation happens in this case; it's pure recoloring, which is why it's the only case that needs to keep looping.</p>
+          </div>
+          <div class="panel">
+            <h4>Case 2 &rarr; Case 3 walk-through</h4>
+            <p>z is a red right child whose parent is a red left child (a "triangle" shape) and the uncle is black. Case 2 applies a rotation at the parent to turn the triangle into a straight "line" (z becomes the left child of its former parent, which is now z's child) &mdash; this doesn't fix the violation by itself, it just falls through into Case 3, which recolors and rotates at the grandparent to finish.</p>
+          </div>
+        </div>
+
+        <!-- PRACTICE -->
+        <div class="subview" id="sub-rbt-practice">
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 1</span><span class="diff">Warm-up</span></div>
+            <p class="ptext">Which of the 5 red-black properties is violated immediately after a plain BST-insert colors the new node red, if its parent happens to also be red? Which property is never at risk from a plain insertion?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><strong>Violated:</strong> Property 4 (a red node with a red child/parent &mdash; two reds in a row).</p>
+              <p><strong>Never at risk:</strong> Property 5 (black-heights) &mdash; inserting a <em>red</em> node adds zero black nodes to any path, so every path's black-node count is unchanged. This is exactly why insertion colors the new node red rather than black: coloring it black would immediately break property 5 on every path through it.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 2</span><span class="diff">Core</span></div>
+            <p class="ptext">A red-black tree has n = 63 internal nodes. What's the maximum possible height? What's the minimum possible height (i.e. if it were a perfectly balanced binary tree)?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><strong>Max height:</strong> h &le; 2 lg(63+1) = 2 lg(64) = 2 &times; 6 = <strong>12</strong>.</p>
+              <p><strong>Min height:</strong> a perfectly balanced tree with 63 = 2<sup>6</sup>&minus;1 nodes has height lg(64) &minus; 1 = <strong>5</strong> (levels 0 through 5, fully packed).</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 3</span><span class="diff">Core</span></div>
+            <p class="ptext">During RB-INSERT-FIXUP, z's uncle is red. What does the algorithm do, and why does it need to keep looping afterward (unlike Cases 2/3)?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Case 1: recolor z's parent black, z's uncle black, and z's grandparent red. Then set z &larr; z.p.p (grandparent) and re-check the loop condition.</p>
+              <p>It must keep looping because recoloring the grandparent <em>red</em> might create a new red-red violation one level further up (between the grandparent and <em>its</em> parent) &mdash; the violation has effectively moved two levels up the tree rather than being resolved. Cases 2 and 3 instead end with a rotation that leaves the subtree's root black, which can never conflict with the node's own parent, so they always terminate the loop.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 4</span><span class="diff">Conceptual</span></div>
+            <p class="ptext">Why is RB-INSERT-FIXUP's loop guaranteed to run O(lg n) times rather than O(n) times?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>The only case that continues the loop (Case 1) moves the "current node" z two levels up the tree each iteration (to z.p.p). Since the tree has height O(lg n) (that's the whole point of a red-black tree), you can move up at most O(lg n) times before hitting the root. Cases 2 and 3 always terminate immediately after one rotation, so they can't blow up the iteration count either.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 5</span><span class="diff">Challenge</span></div>
+            <p class="ptext">Sketch why a single RIGHT-ROTATE or LEFT-ROTATE never breaks the underlying binary-search-tree property, even though it changes the shape of the tree.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>RIGHT-ROTATE(T, x) with y = left[x] only rearranges x, y, and y's right subtree &mdash; call it &beta;. Before rotation: &beta; is between y and x in key order (y &le; &beta; &le; x, since &beta; = right[y] which is &gt; y but still &lt; x as it's in x's left subtree). After rotation, &beta; becomes x's <em>left</em> subtree, and x becomes y's <em>right</em> child. That ordering (y &le; &beta; &le; x) is exactly what's required for &beta; to sit as x's left child while x sits as y's right child &mdash; the relative order of every key is preserved, only the pointer structure changes. Everything outside {x, y, &beta;} is untouched.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- B-TREES -->
+    <!-- ============================================================ -->
+    <section class="view" id="view-btree" style="--accent:var(--btree); --accent-dim:var(--btree-dim);">
+      <div class="topic-view">
+        <div class="topic-head">
+          <div>
+            <span class="label">04 / B-Trees</span>
+            <h2>B-Trees</h2>
+          </div>
+          <button class="back" onclick="goHome()">&larr; ALL TOPICS</button>
+        </div>
+        <p class="topic-dek">A balanced multiway search tree designed around <strong style="color:var(--text)">disk I/O</strong>, not comparisons: each node is sized to fill one disk page, so a node holds many keys and children, keeping the tree shallow and minimizing expensive disk reads.</p>
+
+        <div class="subtabs">
+          <button class="subtab active" onclick="showSub('btree','cheat',this)">Cheat Sheet</button>
+          <button class="subtab" onclick="showSub('btree','notes',this)">Notes</button>
+          <button class="subtab" onclick="showSub('btree','examples',this)">Examples</button>
+          <button class="subtab" onclick="showSub('btree','practice',this)">Practice</button>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <div class="subview active" id="sub-btree-cheat">
+          <div class="panel">
+            <h4>Why B-Trees exist</h4>
+            <p>Disk seek/rotation time is milliseconds (10<sup>&minus;3</sup>s); main-memory access is nanoseconds (10<sup>&minus;9</sup>s) &mdash; a 5&ndash;6 order-of-magnitude gap. Once the read/write head is positioned, streaming data is comparatively cheap. So the goal is to <strong>minimize the number of disk pages touched</strong>, even if that means more work per page. A B-tree node is sized to exactly one disk page, making the branching factor huge and the tree very shallow.</p>
+          </div>
+          <div class="panel">
+            <h4>Properties (minimum degree t &ge; 2)</h4>
+            <table class="data-table">
+              <tr><th></th><th># of keys</th><th># of children</th></tr>
+              <tr><td>Min (non-root)</td><td>t &minus; 1</td><td>t</td></tr>
+              <tr><td>Max</td><td>2t &minus; 1 <span style="color:var(--text-faint);">(node is "full")</span></td><td>2t</td></tr>
+            </table>
+            <p style="font-size:12.5px;">The root is exempt from the minimum &mdash; it may have as few as 1 key (and 2 children), or even 0 keys if the whole tree is empty.</p>
+          </div>
+          <div class="quickgrid">
+            <div class="panel">
+              <h4>Node attributes</h4>
+              <ul>
+                <li><span class="inline-code">x.n</span> &mdash; number of keys currently in x</li>
+                <li><span class="inline-code">x.key<sub>1..n</sub></span> &mdash; keys in nondecreasing order</li>
+                <li><span class="inline-code">x.leaf</span> &mdash; boolean, true if x is a leaf</li>
+                <li><span class="inline-code">x.c<sub>1..n+1</sub></span> &mdash; child pointers (internal nodes only)</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h4>Height &amp; running time</h4>
+              <p>Height is <span class="inline-code">O(log<sub>t</sub> n)</span> &mdash; dramatically shallower than a binary tree for large t. Search/insert/delete all touch O(h) = O(log<sub>t</sub> n) nodes, i.e. O(log<sub>t</sub> n) disk accesses, each doing O(t) in-memory work to scan the node &mdash; total O(t log<sub>t</sub> n) time.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="subview" id="sub-btree-notes">
+          <div class="panel">
+            <h4>Formal properties (CLRS)</h4>
+            <ol>
+              <li>Every node x has: <span class="inline-code">x.n</span> (# keys), the keys themselves <span class="inline-code">x.key<sub>1</sub> &le; ... &le; x.key<sub>x.n</sub></span>, and <span class="inline-code">x.leaf</span>.</li>
+              <li>Each internal node also has <span class="inline-code">x.n + 1</span> children pointers <span class="inline-code">x.c<sub>1</sub>, ..., x.c<sub>x.n+1</sub></span>. Leaves have none.</li>
+              <li>The keys <span class="inline-code">x.key<sub>i</sub></span> separate the ranges of keys in each subtree: if k<sub>i</sub> is any key in the subtree rooted at <span class="inline-code">x.c<sub>i</sub></span>, then <span class="inline-code">k<sub>1</sub> &le; x.key<sub>1</sub> &le; k<sub>2</sub> &le; x.key<sub>2</sub> &le; ... &le; x.key<sub>x.n</sub> &le; k<sub>x.n+1</sub></span>.</li>
+              <li>All leaves have the same depth &mdash; the tree's height h. <strong>This is what keeps B-trees balanced.</strong></li>
+              <li>Nodes have lower/upper bounds on key count, governed by the minimum degree t &ge; 2: every node other than the root has at least t&minus;1 keys (at least t children if internal); every node has at most 2t&minus;1 keys (at most 2t children). A node with exactly 2t&minus;1 keys is <strong>full</strong>.</li>
+            </ol>
+          </div>
+          <div class="panel">
+            <h4>The disk-I/O argument</h4>
+            <p>A B-tree node is deliberately sized to be as large as a whole disk page, which is what limits (and determines) t. Because one node read = one disk access regardless of how many keys are packed into that node, making nodes as large as possible (many keys, high branching factor) directly minimizes the number of disk accesses needed to reach any key &mdash; the tree's height shrinks logarithmically in t rather than in 2.</p>
+          </div>
+          <div class="panel">
+            <h4>Insertion (single-pass, split-on-the-way-down)</h4>
+            <p>Standard B-tree insertion never inserts into a full node directly. Instead, while descending from the root looking for the right leaf, it <strong>proactively splits</strong> any full node it passes through <em>before</em> recursing into it. Splitting a full node (2t&minus;1 keys) sends its median key up to the parent and divides the remaining 2t&minus;2 keys into two nodes of t&minus;1 keys each &mdash; both now valid, and the parent gains one key (never itself becoming over-full because it was already checked/split at this pass). If the root itself is full, a split there is the only way a B-tree's height grows &mdash; growth happens at the top, keeping the tree perfectly height-balanced.</p>
+          </div>
+          <div class="panel">
+            <h4>Deletion &mdash; the guiding idea</h4>
+            <p>Symmetric to insertion: never recurse into a node with only the minimum t&minus;1 keys. Before descending into such a child, either borrow a key from an adjacent sibling that has spare keys (a rotation through the parent), or merge the child with a sibling (pulling a key down from the parent) if no sibling has any to spare. This guarantees every node you actually delete from has &ge; t keys, so removing one never underflows it.</p>
+          </div>
+        </div>
+
+        <!-- EXAMPLES -->
+        <div class="subview" id="sub-btree-examples">
+          <div class="panel">
+            <h4>Example tree</h4>
+            <p>Minimum degree t = 3 (min 2 keys, max 5 keys per node):</p>
+            <pre class="code-block">                     [ M ]
+                    /       \
+              [D H]           [Q T X]
+             /  |  \          /  |  \  \
+          [BC][FG][JKL]  [NP][RS][VW][YZ]</pre>
+            <p>Root has 1 key (M) and 2 children &mdash; fine, since the root is exempt from the minimum-key rule. Every internal node's key count sits within [t&minus;1, 2t&minus;1] = [2,5], and every leaf is at the same depth (2), satisfying property 4.</p>
+          </div>
+          <div class="panel">
+            <h4>Min/max, worked (t = 2)</h4>
+            <table class="data-table">
+              <tr><th></th><th># keys</th><th># children</th></tr>
+              <tr><td>Min (non-root)</td><td>t &minus; 1 = 1</td><td>t = 2</td></tr>
+              <tr><td>Max</td><td>2t &minus; 1 = 3</td><td>2t = 4</td></tr>
+            </table>
+            <p>With t = 2 a "full" node has 3 keys and 4 children &mdash; this specific case (t=2) is often called a <strong>2-3-4 tree</strong> in other textbooks.</p>
+          </div>
+        </div>
+
+        <!-- PRACTICE -->
+        <div class="subview" id="sub-btree-practice">
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 1</span><span class="diff">Warm-up</span></div>
+            <p class="ptext">For a B-tree with minimum degree t = 4, what is the minimum and maximum number of keys a non-root node can hold? What about the minimum and maximum number of children?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><strong>Keys:</strong> min = t&minus;1 = 3, max = 2t&minus;1 = 7.</p>
+              <p><strong>Children:</strong> min = t = 4, max = 2t = 8.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 2</span><span class="diff">Core</span></div>
+            <p class="ptext">A B-tree node x is "full" and you're inserting a new key that would route through x on the way to a leaf. What does the insertion algorithm do to x <em>before</em> continuing down, and why is it done proactively rather than waiting until x actually overflows?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>The algorithm splits x immediately: its median key moves up into x's parent, and the remaining keys divide into two new nodes of t&minus;1 keys each.</p>
+              <p>It's done proactively (on the way down, before recursing) so the whole operation stays a <strong>single top-to-bottom pass</strong> with no backtracking. If you waited until a node actually overflowed (2t keys) after insertion, you'd need to walk back up the tree fixing overflows one level at a time &mdash; correct, but requires a second pass. Splitting full nodes pre-emptively guarantees the parent you're about to move into always has room to absorb a split child, so one pass suffices.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 3</span><span class="diff">Core</span></div>
+            <p class="ptext">Explain why property 4 (all leaves at the same depth) means a B-tree's height can only grow at the root, never at a leaf.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>If a new level appeared underneath some leaf but not others, leaves would sit at different depths, violating property 4. So the only way to add a level without breaking that invariant is to add it uniformly at the top: when the root is full and needs to split, a brand-new root is created above it with the old root's median key, and the old root's two halves become its two children &mdash; every existing leaf just moved down by exactly one level simultaneously.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 4</span><span class="diff">Conceptual</span></div>
+            <p class="ptext">Why does making B-tree nodes larger (bigger t) reduce the number of disk accesses for a search, and why doesn't a similar trick help much for an in-memory binary search tree?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Height of a B-tree is roughly log<sub>t</sub>(n) &mdash; increasing the branching factor t shrinks the height (and thus the number of node-reads = disk accesses) logarithmically. Since a disk access costs milliseconds regardless of how much of the page you read, packing many keys into the one page you already paid to fetch is essentially free extra work, and it directly cuts the number of expensive fetches.</p>
+              <p>In main memory, the per-access cost is nanoseconds and roughly the same whether you touch 2 keys or 200 in one "node," so there's no analogous fixed cost to amortize &mdash; a plain binary tree (branching factor 2) with O(lg n) comparisons is already about as fast as comparison-based search gets, and widening nodes there mostly just adds more comparisons per node for no benefit.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 5</span><span class="diff">Challenge</span></div>
+            <p class="ptext">A B-tree of minimum degree t = 3 currently has height h = 2 (root, one internal level, leaves). What is the <em>minimum</em> possible number of keys stored in the tree?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Minimize at every level: root has just 1 key &rarr; 2 children. Each of those (non-root, so &ge; t&minus;1 = 2 keys) has the minimum 2 keys &rarr; 3 children each, so 6 leaves total. Each leaf (also non-root, min = 2 keys) holds 2 keys.</p>
+              <p>Total = 1 (root) + 2&times;2 (internal level) + 6&times;2 (leaves) = 1 + 4 + 12 = <strong>17 keys</strong>.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- MINIMUM SPANNING TREES -->
+    <!-- ============================================================ -->
+    <section class="view" id="view-mst" style="--accent:var(--mst); --accent-dim:var(--mst-dim);">
+      <div class="topic-view">
+        <div class="topic-head">
+          <div>
+            <span class="label">05 / Minimum Spanning Trees</span>
+            <h2>Minimum Spanning Trees</h2>
+          </div>
+          <button class="back" onclick="goHome()">&larr; ALL TOPICS</button>
+        </div>
+        <p class="topic-dek">Given a connected, undirected, weighted graph G = (V,E), find a subset of edges T that connects all vertices at <strong style="color:var(--text)">minimum total weight</strong>. Both classic algorithms are greedy, and both are proven correct by the same safe-edge theorem.</p>
+
+        <div class="subtabs">
+          <button class="subtab active" onclick="showSub('mst','cheat',this)">Cheat Sheet</button>
+          <button class="subtab" onclick="showSub('mst','notes',this)">Notes</button>
+          <button class="subtab" onclick="showSub('mst','examples',this)">Examples</button>
+          <button class="subtab" onclick="showSub('mst','practice',this)">Practice</button>
+        </div>
+
+        <!-- CHEAT SHEET -->
+        <div class="subview active" id="sub-mst-cheat">
+          <div class="panel">
+            <h4>Problem &amp; Properties</h4>
+            <p>Find T &sube; E such that (1) T connects all vertices (a spanning tree) and (2) <span class="inline-code">w(T) = &sum; w(u,v)</span> for (u,v)&isin;T is minimized. An MST has exactly <span class="inline-code">|V| &minus; 1</span> edges, has no cycles, and may not be unique (ties can produce different MSTs of equal weight).</p>
+          </div>
+          <div class="two-col">
+            <div class="panel">
+              <h4>Kruskal's Algorithm</h4>
+              <p>Sort all edges by weight; scan in increasing order; add an edge if it connects two currently-different components (checked via a disjoint-set / union-find structure); skip it otherwise (would form a cycle).</p>
+              <p><strong>Time: O(E lg V)</strong> &mdash; dominated by the sort (or the union-find operations if edges are pre-sorted).</p>
+            </div>
+            <div class="panel">
+              <h4>Prim's Algorithm</h4>
+              <p>Grows a single tree from an arbitrary root r. At each step, adds the minimum-weight edge connecting the current tree to any vertex outside it (the "light edge"), using a min-priority queue keyed on each vertex's cheapest known connection.</p>
+              <p><strong>Time: O(E lg V)</strong> with a binary heap; O(E + V lg V) with a Fibonacci heap.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h4>Safe Edge Theorem</h4>
+            <p>Let A be a subset of some MST, (S, V&minus;S) any cut that respects A (no edge of A crosses it), and (u,v) a <strong>light edge</strong> (minimum weight) crossing the cut. Then (u,v) is <strong>safe</strong> for A &mdash; i.e. A &cup; {(u,v)} is still a subset of some MST. Both Kruskal's and Prim's are instances of the Generic-MST pattern: repeatedly add a safe edge until A is a spanning tree.</p>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="subview" id="sub-mst-notes">
+          <div class="panel">
+            <h4>Generic MST algorithm</h4>
+            <pre class="code-block">GENERIC-MST(G, w)
+1  A = &empty;
+2  while A does not form a spanning tree
+3      find an edge (u,v) that is safe for A
+4      A = A &cup; {(u,v)}
+5  return A</pre>
+            <p><strong>Loop invariant:</strong> A is always a subset of some MST. Trivially true at initialization (empty set). Maintained because only safe edges are added. At termination, A is a spanning tree that is also a subset of an MST &mdash; hence an MST itself.</p>
+          </div>
+          <div class="panel">
+            <h4>Finding a safe edge</h4>
+            <p>Let S &sub; V be any proper subset that includes some vertex c but not vertex f, such that no edge of A crosses the cut (S, V&minus;S) &mdash; i.e. (S, V&minus;S) <em>respects</em> A. Among all edges crossing this cut, the minimum-weight one is a <strong>light edge</strong>. Intuitively: any MST must connect S to V&minus;S with <em>some</em> edge, and swapping in a heavier crossing edge for a lighter one can only reduce total weight &mdash; so choosing the lightest crossing edge never costs you optimality.</p>
+            <p><strong>Proof sketch:</strong> Suppose the light edge (u,v) is not in some MST T that contains A. T must still connect S to V&minus;S via some edge (x,y) on the unique path between u and v in T. Since (u,v) is a light edge, w(u,v) &le; w(x,y). Swapping: remove (x,y) from T, add (u,v) &mdash; produces a new spanning tree T&prime; with w(T&prime;) &le; w(T), so T&prime; is also an MST, and it contains A &cup; {(u,v)}. Contradiction resolved: (u,v) is safe.</p>
+          </div>
+          <div class="panel">
+            <h4>Kruskal's &mdash; pseudocode</h4>
+            <pre class="code-block">MST-KRUSKAL(G, w)
+1  A = &empty;
+2  for each vertex v in G.V
+3      MAKE-SET(v)
+4  create a single list of the edges in G.E, sorted into
+5      monotonically increasing order by weight w
+6  for each edge (u,v) taken from the sorted list in order
+7      if FIND-SET(u) != FIND-SET(v)
+8          A = A &cup; {(u,v)}
+9          UNION(u,v)
+10 return A</pre>
+            <p><strong>Analysis:</strong> MAKE-SET calls: O(V). Sorting E: O(E lg E) = O(E lg V) (since E &lt; V&sup2; &rArr; lg E = O(lg V)). The for-loop does O(E) FIND-SET/UNION calls; with union by rank + path compression these total O(E &alpha;(V)) &asymp; O(E). Total: <strong>O(E lg V)</strong>, dominated by the sort. (If edges arrive pre-sorted, it drops to nearly linear.)</p>
+          </div>
+          <div class="panel">
+            <h4>Prim's &mdash; pseudocode</h4>
+            <p>Uses a min-priority queue Q of vertices not yet in the tree, keyed by <span class="inline-code">v.key</span> = the minimum weight of any edge connecting v to the current tree A (&infin; if none exists yet); <span class="inline-code">v.&pi;</span> tracks v's parent in A.</p>
+            <ul>
+              <li>Initialize: all keys &infin; except the root (key 0).</li>
+              <li>Repeatedly extract the min-key vertex u from Q, add edge (u, u.&pi;) to the tree, then for each neighbor v of u still in Q, if w(u,v) &lt; v.key, update v.key and v.&pi; (a decrease-key).</li>
+              <li>Terminates when Q is empty &mdash; A = {(v, v.&pi;) : v &isin; V &minus; {r}} is the MST.</li>
+            </ul>
+            <p><strong>Analysis (binary heap):</strong> Building/initializing Q: O(V). O(V) EXTRACT-MIN calls at O(lg V) each = O(V lg V). Up to O(E) DECREASE-KEY calls at O(lg V) each = O(E lg V). Total: <strong>O(E lg V)</strong>. With a Fibonacci heap, DECREASE-KEY is O(1) amortized, dropping the total to O(E + V lg V).</p>
+          </div>
+        </div>
+
+        <!-- EXAMPLES -->
+        <div class="subview" id="sub-mst-examples">
+          <div class="panel">
+            <h4>Kruskal's, worked</h4>
+            <p>Running Kruskal's on a sample weighted graph, processing edges in increasing weight order and testing each against the union-find structure:</p>
+            <pre class="code-block">edge   decision
+(c,f)  : safe   (different components -> add, union)
+(g,i)  : safe
+(e,f)  : safe
+(c,e)  : reject  (c and e already connected -> would form a cycle)
+(d,h)  : safe
+(f,h)  : safe
+(b,d)  : safe
+(d,g)  : safe
+(b,c)  : reject  (already connected)
+(a,h)  : safe</pre>
+            <p>The algorithm stops once |V|&minus;1 edges have been accepted (a full spanning tree); any edges considered afterward are irrelevant. Notice the rejects are exactly the edges whose endpoints Union-Find already reports as connected &mdash; adding them would close a cycle.</p>
+          </div>
+          <div class="panel">
+            <h4>Prim's, worked</h4>
+            <p>Starting from an arbitrary root r, Prim's grows one tree outward. At each step the priority queue holds every vertex not yet in the tree, keyed by its cheapest edge back into the tree; the algorithm repeatedly extracts the minimum (the current "light edge") and relaxes (decreases the key of) that vertex's neighbors still in the queue. Unlike Kruskal's, at every intermediate point the edges chosen so far always form a single connected tree (rather than a forest of pieces that merge later).</p>
+          </div>
+        </div>
+
+        <!-- PRACTICE -->
+        <div class="subview" id="sub-mst-practice">
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 1</span><span class="diff">Warm-up</span></div>
+            <p class="ptext">A connected graph has 12 vertices. How many edges must its MST contain? Can the MST contain a cycle?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><strong>Edges:</strong> |V| &minus; 1 = 11.</p>
+              <p><strong>Cycles:</strong> No &mdash; an MST is a tree by definition, and trees are acyclic. A cycle would mean at least one edge could be removed while keeping the graph connected, contradicting minimality (removing any positive-weight edge from a cycle only lowers total weight while preserving connectivity).</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 2</span><span class="diff">Core</span></div>
+            <p class="ptext">Trace Kruskal's algorithm on these edges (already sorted by weight): <code>(A,B,1), (C,D,2), (A,C,3), (B,D,4), (B,C,5)</code> over vertices {A,B,C,D}. Which edges are accepted, and which are rejected?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>(A,B,1): different sets &rarr; <strong>accept</strong>. Union {A,B}.</p>
+              <p>(C,D,2): different sets &rarr; <strong>accept</strong>. Union {C,D}.</p>
+              <p>(A,C,3): {A,B} vs {C,D}, different &rarr; <strong>accept</strong>. Now all one component {A,B,C,D}. We have |V|&minus;1 = 3 edges &mdash; done.</p>
+              <p>(B,D,4) and (B,C,5) are never needed (algorithm can stop early), but if considered: both endpoints already connected &rarr; <strong>reject</strong> (would form a cycle).</p>
+              <p><strong>MST weight:</strong> 1 + 2 + 3 = 6.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 3</span><span class="diff">Core</span></div>
+            <p class="ptext">In Prim's algorithm, what does <code>v.key</code> represent at any point during execution, and what operation updates it when a new vertex u is added to the tree?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p><code>v.key</code> is the minimum weight of any edge connecting vertex v (currently outside the tree) to <em>some</em> vertex already inside the tree &mdash; i.e. the cheapest way v could currently join. It starts at &infin; for every non-root vertex.</p>
+              <p>When u is extracted and added to the tree, for every neighbor v of u still in the queue: if <code>w(u,v) &lt; v.key</code>, then a DECREASE-KEY sets <code>v.key = w(u,v)</code> and <code>v.&pi; = u</code> &mdash; u is now v's cheapest known connection back to the tree.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 4</span><span class="diff">Conceptual</span></div>
+            <p class="ptext">Explain, using the safe-edge theorem, why Kruskal's algorithm is guaranteed to produce an MST rather than just some spanning tree.</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>Every time Kruskal's accepts an edge (u,v), it's because u and v are in different components of the current forest A. Let S be the vertex set of u's component. Since u and v are in different components, no edge of A crosses the cut (S, V&minus;S) &mdash; so this cut respects A. Because edges are processed in increasing weight order and (u,v) is the first crossing edge encountered (any earlier, lighter crossing edge would already have merged the two sides), (u,v) is a <strong>light edge</strong> for this cut. By the safe-edge theorem, a light edge for a cut that respects A is always safe to add. So every edge Kruskal's adds is provably safe, and Generic-MST's loop invariant (A &sube; some MST) holds throughout &mdash; guaranteeing the final result is an MST, not just any spanning tree.</p>
+            </div>
+          </div>
+
+          <div class="problem">
+            <div class="phead"><span class="pnum">PROBLEM 5</span><span class="diff">Challenge</span></div>
+            <p class="ptext">A graph has all distinct edge weights. What does this guarantee about the number of MSTs the graph can have? What changes if some edge weights are equal?</p>
+            <button class="reveal-btn" onclick="toggleSolution(this)">SHOW SOLUTION</button>
+            <div class="solution">
+              <p>If all edge weights are distinct, the graph has a <strong>unique</strong> MST. Intuition: at every cut, there is exactly one light edge (no ties), and the safe-edge argument shows any MST must include every such uniquely-determined light edge for cuts respecting the edges chosen so far &mdash; leaving no freedom of choice at any step.</p>
+              <p>With tied weights, multiple edges can be "equally light" across some cut, so different valid tie-breaking choices (different algorithms, or the same algorithm processing edges in a different order among equal weights) can yield different spanning trees &mdash; all with the same total weight, so all are valid MSTs. This is exactly the situation shown in the definitions: swapping one edge in a tied MST for another equal-weight edge produces a different MST of the same weight.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    </div>
+
+    <footer class="sitefoot">DATA STRUCTURES FIELD GUIDE — COMPILED FROM COURSE LECTURE NOTES</footer>
+  </main>
+</div>
+
+<script>
+const TOPICS = [
+  {id:'hash', num:'01', name:'Hash Tables', short:'Direct addressing, chaining, open addressing, universal hashing.', color:'var(--hash)', dimvar:'var(--hash-dim)'},
+  {id:'bst', num:'02', name:'Binary Search Trees', short:'Search, insert, delete, traversals, successor/predecessor.', color:'var(--bst)', dimvar:'var(--bst-dim)'},
+  {id:'rbt', num:'03', name:'Red-Black Trees', short:'Self-balancing BSTs, rotations, insert/delete fixups.', color:'var(--rbt)', dimvar:'var(--rbt-dim)'},
+  {id:'btree', num:'04', name:'B-Trees', short:'Disk-optimized multiway search trees for secondary storage.', color:'var(--btree)', dimvar:'var(--btree-dim)'},
+  {id:'mst', num:'05', name:'Minimum Spanning Trees', short:"Kruskal's and Prim's algorithms on weighted graphs.", color:'var(--mst)', dimvar:'var(--mst-dim)'},
+];
+
+const ICONS = {
+  hash: `<svg class="icon" viewBox="0 0 120 44" fill="none"><g stroke="var(--hash)" stroke-width="2"><rect x="2" y="4" width="24" height="36" rx="3"/><rect x="32" y="4" width="24" height="36" rx="3"/><rect x="62" y="4" width="24" height="36" rx="3"/></g><line x1="8" y1="14" x2="20" y2="14" stroke="var(--hash)" stroke-width="2" opacity=".6"/><line x1="38" y1="24" x2="50" y2="24" stroke="var(--hash)" stroke-width="2" opacity=".6"/><line x1="68" y1="30" x2="80" y2="30" stroke="var(--hash)" stroke-width="2" opacity=".6"/><path d="M92 22 L108 12 M92 22 L108 32 M92 22 L108 22" stroke="var(--hash)" stroke-width="2" opacity=".9"/></svg>`,
+  bst: `<svg class="icon" viewBox="0 0 120 44" fill="none" stroke="var(--bst)" stroke-width="2"><circle cx="60" cy="8" r="6"/><circle cx="30" cy="26" r="6"/><circle cx="90" cy="26" r="6"/><circle cx="15" cy="40" r="5"/><circle cx="45" cy="40" r="5"/><circle cx="75" cy="40" r="5"/><circle cx="105" cy="40" r="5"/><path d="M60 14 L30 20 M60 14 L90 20 M30 32 L15 35 M30 32 L45 35 M90 32 L75 35 M90 32 L105 35"/></svg>`,
+  rbt: `<svg class="icon" viewBox="0 0 120 44" fill="none"><g stroke-width="2"><circle cx="60" cy="8" r="6" fill="#14171d" stroke="var(--rbt)"/><circle cx="30" cy="26" r="6" fill="var(--rbt)" stroke="var(--rbt)"/><circle cx="90" cy="26" r="6" fill="#14171d" stroke="var(--rbt)"/><circle cx="15" cy="40" r="5" fill="#14171d" stroke="var(--rbt)"/><circle cx="45" cy="40" r="5" fill="#14171d" stroke="var(--rbt)"/></g><g stroke="var(--rbt)" stroke-width="2"><path d="M60 14 L30 20 M60 14 L90 20 M30 32 L15 35 M30 32 L45 35"/></g></svg>`,
+  btree: `<svg class="icon" viewBox="0 0 120 44" fill="none" stroke="var(--btree)" stroke-width="2"><rect x="44" y="2" width="32" height="12" rx="2"/><rect x="4" y="26" width="32" height="12" rx="2"/><rect x="44" y="26" width="32" height="12" rx="2"/><rect x="84" y="26" width="32" height="12" rx="2"/><path d="M55 14 L20 26 M65 14 L60 26 M65 14 L100 26"/></svg>`,
+  mst: `<svg class="icon" viewBox="0 0 120 44" fill="none" stroke="var(--mst)" stroke-width="2"><circle cx="14" cy="22" r="5"/><circle cx="50" cy="6" r="5"/><circle cx="50" cy="38" r="5"/><circle cx="88" cy="14" r="5"/><circle cx="88" cy="34" r="5"/><circle cx="112" cy="22" r="5"/><g stroke-width="2.5"><path d="M14 22 L50 6 M14 22 L50 38 M50 6 L88 14 M50 38 L88 34 M88 14 L112 22 M88 34 L112 22"/></g><path d="M50 6 L88 34" stroke-dasharray="3 3" opacity=".4"/></svg>`,
+};
+
+const topicNav = document.getElementById('topicNav');
+const cardGrid = document.getElementById('cardGrid');
+
+TOPICS.forEach(t=>{
+  const li = document.createElement('li');
+  li.innerHTML = `<button class="topic-btn" id="nav-${t.id}" style="--dot-color:${t.color}" onclick="showTopic('${t.id}')">
+      <span class="dot"></span>${t.name}<span class="num">${t.num}</span>
+    </button>`;
+  topicNav.appendChild(li);
+
+  const card = document.createElement('div');
+  card.className = 'topic-card';
+  card.style.setProperty('--card-color', t.color);
+  card.onclick = ()=>showTopic(t.id);
+  card.innerHTML = `<span class="idx">${t.num} / 05</span>
+    ${ICONS[t.id]}
+    <h3>${t.name}</h3>
+    <p>${t.short}</p>
+    <span class="go">OPEN GUIDE &rarr;</span>`;
+  cardGrid.appendChild(card);
+});
+
+function goHome(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+
+function showTopic(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showSub(topicId, subId, el){
+  const scope = document.getElementById('view-'+topicId);
+  scope.querySelectorAll('.subview').forEach(v=>v.classList.remove('active'));
+  scope.querySelector('#sub-'+topicId+'-'+subId).classList.add('active');
+  scope.querySelectorAll('.subtab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleSolution(btn){
+  const sol = btn.nextElementSibling;
+  sol.classList.toggle('shown');
+  btn.textContent = sol.classList.contains('shown') ? 'HIDE SOLUTION' : 'SHOW SOLUTION';
+}
+</script>
+<!--TOPIC_CONTENT-->
+</body>
+</html>
